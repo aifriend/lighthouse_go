@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 pip install numpy
 pip install pygame
 pip install 'tensorflow==1.8'
