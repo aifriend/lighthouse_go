@@ -11,8 +11,8 @@ from chainer.iterators import SerialIterator
 from chainer.training import extensions
 
 sys.path.append('../../')
-from utils import dotdict
-from NeuralNet import NeuralNet
+from lib.utils import dotdict
+from lib.NeuralNet import NeuralNet
 from .OthelloNNet import OthelloNNet as onnet
 
 args = dotdict({
@@ -90,7 +90,7 @@ class NNetWrapper(NeuralNet):
         """
         examples: list of examples, each example is of form (board, pi, v)
         """
-        from examples.pytorch_classification.utils import Bar, AverageMeter
+        from lib.utils import Bar, AverageMeter
         optimizer = optimizers.Adam(alpha=args.lr)
         optimizer.setup(self.nnet)
 

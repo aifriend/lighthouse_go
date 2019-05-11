@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 sys.path.append('../..')
-from NeuralNet import NeuralNet
+from lib.NeuralNet import NeuralNet
 from examples.rts.keras.RTSNNet import RTSNNet
 from examples.rts.src.config import VERBOSE_MODEL_FIT
 

@@ -5,9 +5,9 @@ import time
 import numpy as np
 
 sys.path.append('../../')
-from utils import *
-from examples.pytorch_classification.utils import Bar, AverageMeter
-from NeuralNet import NeuralNet
+from lib.utils import *
+from lib.utils import Bar, AverageMeter
+from lib.NeuralNet import NeuralNet
 
 import tensorflow as tf
 from .GobangNNet import GobangNNet as onnet

@@ -1,6 +1,6 @@
-import Arena
 from examples.tafl.TaflGame import TaflGame, display
 from examples.tafl.TaflPlayers import *
+from lib import Arena
 
 # from tafl.keras.NNet import NNetWrapper as NNet
 

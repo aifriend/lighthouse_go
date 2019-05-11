@@ -12,7 +12,7 @@ sys.path.append('..')
 from examples.rts.src.config import NUM_ACTS, P_NAME_IDX, A_TYPE_IDX, d_user_shortcuts, FPS, ACTS, d_a_type, ACTS_REV, \
     d_user_shortcuts_rev
 from examples.rts.visualization.rts_pygame import init_visuals, update_graphics, message_display
-from utils import dotdict
+from lib.utils import dotdict
 
 """
 RTSPlayers.py

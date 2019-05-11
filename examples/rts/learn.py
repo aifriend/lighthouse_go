@@ -3,7 +3,7 @@ import sys
 from examples.rts.src.config_class import CONFIG
 
 sys.path.append('..')
-from Coach import Coach
+from lib.Coach import Coach
 # from rts.configurations.ConfigWrapper import LearnArgs
 from examples.rts.RTSGame import RTSGame as Game
 from examples.rts.keras.NNet import NNetWrapper as nn

@@ -6,7 +6,7 @@ import numpy as np
 
 sys.path.append('../..')
 from examples.rts.src.encoders import OneHotEncoder, NumericEncoder
-from utils import dotdict
+from lib.utils import dotdict
 
 # ####################################################################################
 # ###################### INITIAL CONFIGS AND OUTPUTS ##################################
@@ -473,7 +473,7 @@ class Configuration:
                          onehot_encoder,
                          player_model_file):
                 from examples.rts.keras.NNet import NNetWrapper as NNet
-                from MCTS import MCTS
+                from lib.MCTS import MCTS
 
                 if onehot_encoder:
                     encoder = OneHotEncoder()

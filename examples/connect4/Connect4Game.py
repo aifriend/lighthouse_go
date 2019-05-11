@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 sys.path.append('..')
-from Game import Game
+from lib.Game import Game
 from .Connect4Logic import Board
 
 

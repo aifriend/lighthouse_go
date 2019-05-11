@@ -3,7 +3,7 @@ import sys
 from examples.rts.src.config_class import CONFIG
 
 sys.path.append('..')
-import Arena
+from lib import Arena
 from examples.rts.RTSGame import display, RTSGame
 
 """
