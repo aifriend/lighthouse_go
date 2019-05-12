@@ -1,36 +1,17 @@
-import numpy as np
-
-from lib.Arena import Arena
-from lib.MCTS import MCTS
-from lib.utils import dotdict
-from tictactoe.NNet import NNetWrapper as NNet
-from tictactoe.TicTacToeGame import TicTacToeGame, display
-from tictactoe.TicTacToePlayers import RandomPlayer, HumanTicTacToePlayer
-
 """
-use this script to play any two agents against each other, or play manually with
-any agent.
+Compares 2 players against each other and outputs num wins p1/ num wins p2/ draws
 
 """
 
-g = TicTacToeGame()
+from lib import Arena
+from rts.RTSGame import RTSGame, display
+from rts.config.config import CONFIG
 
-# all players
-rp = RandomPlayer(g).play
-hp = HumanTicTacToePlayer(g).play
+CONFIG.set_runner('pit')  # set visibility as pit
 
-# nnet players
-n1 = NNet(g)
-n1.load_checkpoint('tictactoe/pretrained_models', 'best.pth.tar')
-args1 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0})
-mcts1 = MCTS(g, n1, args1)
-n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
+g = RTSGame()
 
-# n2 = NNet(g)
-# n2.load_checkpoint('/dev/8x50x25/','best.pth.tar')
-# args2 = dotdict({'numMCTSSims': 25, 'cpuct':1.0})
-# mcts2 = MCTS(g, n2, args2)
-# n2p = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
+player1, player2 = CONFIG.pit_args.create_players(g)
 
-arena = Arena(n1p, hp, g, display=display)
-print(arena.playGames(2, verbose=True))
+arena = Arena.Arena(player1, player2, g, display=display)
+print(arena.playGames(CONFIG.pit_args.num_games, verbose=CONFIG.visibility))

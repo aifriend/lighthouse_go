@@ -1,33 +1,30 @@
+"""
+Teaches neural network playing of specified game configuration using self play
+This configuration needs to be kept seperate, as different nnet and game configs are set
+
+"""
+
 from lib.Coach import Coach
-from lib.utils import dotdict
-from tictactoe.NNet import NNetWrapper as nnw
-from tictactoe.TicTacToeGame import TicTacToeGame as Game
-
-args = dotdict({
-    'numIters': 1000,
-    'numEps': 100,
-    'tempThreshold': 15,
-    'updateThreshold': 0.6,
-    'maxlenOfQueue': 200000,
-    'numMCTSSims': 25,
-    'arenaCompare': 40,
-    'cpuct': 1,
-
-    'checkpoint': 'temp/',
-    'load_model': True,
-    'load_folder_file': ('tictactoe/pretrained_models', 'best.pth.tar'),
-    'numItersForTrainExamplesHistory': 20,
-})
+from rts.NNet import NNetWrapper as Nnm
+# from rts.configurations.ConfigWrapper import LearnArgs
+from rts.RTSGame import RTSGame as Game
+from rts.config.config import CONFIG
 
 if __name__ == "__main__":
+
+    CONFIG.set_runner('learn')  # set visibility as learn
+
+    # create nnet for this game
     g = Game()
-    nnet = nnw(g)
+    nnet = Nnm(g, CONFIG.nnet_args.encoder)
 
-    if args.load_model:
-        nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+    # If training examples should be loaded from file
+    if CONFIG.learn_args.load_model:
+        nnet.load_checkpoint(CONFIG.learn_args.load_folder_file[0], CONFIG.learn_args.load_folder_file[1])
 
-    c = Coach(g, nnet, args)
-    if args.load_model:
+    # Create coach instance that starts teaching nnet on newly created game using self-play
+    c = Coach(g, nnet, CONFIG.learn_args)
+    if CONFIG.learn_args.load_model:
         print("Load trainExamples from file")
         c.loadTrainExamples()
     c.learn()
