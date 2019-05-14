@@ -3,7 +3,6 @@ Used for displaying Gama visualization using Pygame
 
 """
 
-import ctypes
 from typing import Any, Tuple, Optional
 
 import numpy as np
@@ -42,8 +41,7 @@ def init_visuals(world_width: int, world_height: int, verbose=True) -> Optional[
         import pygame
 
         pygame.init()
-        canvas_scale = int(ctypes.windll.user32.GetSystemMetrics(1) * (
-                2 / 3) / world_height)  # for drawing - it takes 2 thirds of screen height
+        canvas_scale = int(600 * (2 / 3) / world_height)  # for drawing - it takes 2 thirds of screen height
 
         # square
 
@@ -70,8 +68,7 @@ def update_graphics(board: np.ndarray, game_display, clock, fps: int = 1) -> Non
 
     n = board.shape[0]
 
-    canvas_scale = int(
-        ctypes.windll.user32.GetSystemMetrics(1) * (16 / 30) / n)  # for drawing - it takes 2 thirds of screen height
+    canvas_scale = int(600 * (16 / 30) / n)  # for drawing - it takes 2 thirds of screen height
 
     # clear display
     game_display.fill((255, 255, 255))

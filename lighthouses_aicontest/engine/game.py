@@ -27,7 +27,7 @@ while True:
     game.post_round()
     score = ""
     for i in range(len(bots)):
-        score += "P%d: %d" % (i, game.players[i].score)
+        score += "P%d: %d " % (i, game.players[i].score)
     print("########### ROUND %d SCORE: %s" % (round, score))
     round += 1
 

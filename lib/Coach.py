@@ -32,32 +32,32 @@ class Coach:
         """
         This function executes one episode of self-play, starting with player 1.
         As the game is played, each turn is added as a training example to
-        trainExamples. The game is played till the game ends. After the game
+        train_examples. The game is played till the game ends. After the game
         ends, the outcome of the game is used to assign values to each example
-        in trainExamples.
+        in train_examples.
 
-        It uses a temp=1 if episodeStep < tempThreshold, and thereafter
+        It uses a temp=1 if episode_step < tempThreshold, and thereafter
         uses temp=0.
 
         Returns:
-            trainExamples: a list of examples of the form (canonicalBoard,pi,v)
+            train_examples: a list of examples of the form (canonical_board,pi,v)
                            pi is the MCTS informed policy vector, v is +1 if
                            the player eventually won the game, else -1.
         """
-        trainExamples = []
+        train_examples = []
         board = self.game.getInitBoard()
         self.curPlayer = 1
-        episodeStep = 0
+        episode_step = 0
 
         while True:
-            episodeStep += 1
-            canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
-            temp = int(episodeStep < self.args.tempThreshold)
+            episode_step += 1
+            canonical_board = self.game.getCanonicalForm(board, self.curPlayer)
+            temp = int(episode_step < self.args.tempThreshold)
 
-            pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
-            sym = self.game.getSymmetries(canonicalBoard, pi)
+            pi = self.mcts.getActionProb(canonical_board, temp=temp)
+            sym = self.game.getSymmetries(canonical_board, pi)
             for b, p in sym:
-                trainExamples.append([b, self.curPlayer, p, None])
+                train_examples.append([b, self.curPlayer, p, None])
 
             action = np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
@@ -65,7 +65,7 @@ class Coach:
             r = self.game.getGameEnded(board, self.curPlayer)
 
             if r != 0:  # not game ended
-                return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+                return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in train_examples]
 
     def learn(self):
         """
@@ -149,7 +149,7 @@ class Coach:
         filename = os.path.join(folder, self.getCheckpointFile(iteration) + ".examples")
         with open(filename, "wb+") as f:
             Pickler(f).dump(self.trainExamplesHistory)
-        f.closed
+        f.closed()
 
     def loadTrainExamples(self):
         modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
@@ -163,6 +163,6 @@ class Coach:
             print("File with trainExamples found. Read it.")
             with open(examplesFile, "rb") as f:
                 self.trainExamplesHistory = Unpickler(f).load()
-            f.closed
+            f.closed()
             # examples based on the model were already collected (loaded)
             self.skipFirstSelfPlay = True

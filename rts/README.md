@@ -72,9 +72,8 @@ Now timeout is used, which ends game at N ticks (200 in our example) and evaluat
 - sum of both
 
 ### Visualizations
-Game can be played using CMD, PyGame or [Unreal Engine 4](https://github.com/JernejHabjan/TrumpDefense2020).
+Game can be played using CMD, PyGame. 
 ![Pygame](http://prntscr.com/mh9c5f)
-![Unreal Engine 4](http://prntscr.com/mh9ci8)
 
 ### Results
 For learning results, see releases [Here](https://github.com/JernejHabjan/alpha-zero-general/releases/tag/1.0.0) and [Here](https://github.com/JernejHabjan/alpha-zero-general/releases/tag/1.0.1).
@@ -84,7 +83,6 @@ For learning results, see releases [Here](https://github.com/JernejHabjan/alpha-
 - Recommended Python 3.6 (3.7 is not supported by TensorFlow by the time of writing(December 2018))
 - Required TensorFlow (recommended 1.9)
 - Optional Pygame (board outputs can be displayed also in console if Pygame is not used)
-- Module can be connected via rts/visualization/rts_ue4.py to [UE4](https://github.com/JernejHabjan/TrumpDefense2020) using Tensorflow-ue4 v0.8.0 for UE4.19 https://github.com/getnamo/tensorflow-ue4/releases/tag/0.8.0
 
 ## Files
 Main files to start learning and pitting:
