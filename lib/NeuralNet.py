@@ -6,7 +6,7 @@ class NeuralNet:
     the canonical form of the board.
     """
 
-    def __init__(self, game):
+    def __init__(self):
         pass
 
     def train(self, examples):

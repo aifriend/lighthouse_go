@@ -9,19 +9,17 @@ class Arena:
     An Arena class where any 2 agents can be pit against each other.
     """
 
-    def __init__(self, player1, player2, game, display=None):
+    def __init__(self, player1, player2, game, view=None):
         """
         Input:
             player 1,2: two functions that takes board as input, return action
             game: Game object
-            display: a function that takes board as input and prints it (e.g.
-                     display in othello/OthelloGame). Is necessary for verbose
-                     mode.
+            view: a function that takes board as input and prints it. Is necessary for verbose mode.
         """
         self.player1 = player1
         self.player2 = player2
         self.game = game
-        self.display = display
+        self.view = view
 
     def playGame(self, verbose=False):
         """
@@ -36,25 +34,27 @@ class Arena:
         players = [self.player2, None, self.player1]
         cur_player = 1
         board = self.game.getInitBoard()
+        self.view.initView(board)
         it = 0
         while self.game.getGameEnded(board, cur_player) == 0:
             it += 1
             if verbose:
-                assert self.display
+                assert self.view
                 print("Turn ", str(it), "Player ", str(cur_player))
-                self.display(board)
+                self.view.display(board)
             action = players[cur_player + 1](self.game.getCanonicalForm(board, cur_player))
-
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, cur_player), 1)
-
             if valids[action] == 0:
                 print(action)
                 assert valids[action] > 0
+
             board, cur_player = self.game.getNextState(board, cur_player, action)
+
         if verbose:
-            assert self.display
+            assert self.view
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
-            self.display(board)
+            self.view.display(board)
+
         return self.game.getGameEnded(board, 1)
 
     def playGames(self, num, verbose=False):
@@ -78,10 +78,10 @@ class Arena:
         twoWon = 0
         draws = 0
         for _ in range(num):
-            gameResult = self.playGame(verbose=verbose)
-            if gameResult == 1:
+            game_result = self.playGame(verbose=verbose)
+            if game_result == 1:
                 oneWon += 1
-            elif gameResult == -1:
+            elif game_result == -1:
                 twoWon += 1
             else:
                 draws += 1
@@ -99,10 +99,10 @@ class Arena:
         self.player1, self.player2 = self.player2, self.player1
 
         for _ in range(num):
-            gameResult = self.playGame(verbose=verbose)
-            if gameResult == -1:
+            game_result = self.playGame(verbose=verbose)
+            if game_result == -1:
                 oneWon += 1
-            elif gameResult == 1:
+            elif game_result == 1:
                 twoWon += 1
             else:
                 draws += 1

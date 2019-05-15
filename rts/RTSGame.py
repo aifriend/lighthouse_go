@@ -4,7 +4,7 @@ import numpy as np
 
 from rts.Board import Board
 from rts.config.config import CONFIG
-from rts.config.configuration import NUM_ENCODERS, NUM_ACTS, P_NAME_IDX, A_TYPE_IDX, TIME_IDX, FPS
+from rts.config.configuration import NUM_ENCODERS, NUM_ACTS, P_NAME_IDX, A_TYPE_IDX, TIME_IDX
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -206,34 +206,3 @@ class RTSGame:
         else:
             return b.get_combined_score(player)
 
-
-def display(board):
-    """
-    Console presentation of board
-
-    :param board: game state
-    :return: /
-    """
-    from rts.visualization.rts_pygame import init_visuals, update_graphics
-
-    if not CONFIG.visibility:
-        return
-
-    n = board.shape[0]
-    if CONFIG.visibility > 3:
-        game_display, clock = init_visuals(n, n, CONFIG.visibility)
-        update_graphics(board, game_display, clock, FPS)
-    else:
-        for y in range(n):
-            print('-' * (n * 8 + 1))
-            for x in range(n):
-                a_player = board[x][y][P_NAME_IDX]
-                if a_player == 1:
-                    a_player = '+1'
-                if a_player == -1:
-                    a_player = '-1'
-                if a_player == 0:
-                    a_player = ' 0'
-                print("|" + a_player + " " + str(board[x][y][A_TYPE_IDX]) + " ", end="")
-            print("|")
-        print('-' * (n * 8 + 1))
