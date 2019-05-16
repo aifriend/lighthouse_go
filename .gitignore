@@ -1,3 +1,7 @@
+### Player ###
+temp/
+rts/pre-trained-models/
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/

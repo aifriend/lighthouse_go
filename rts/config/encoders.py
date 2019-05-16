@@ -27,18 +27,9 @@ class Encoder:
 
 
 class NumericEncoder(Encoder):
-
     def __init__(self) -> None:
         super().__init__()
         self.NUM_ENCODERS = 6  # player_name, act_type, health, carrying, money, remaining_time
-
-    def encode_multiple(self, boards: np.ndarray) -> np.ndarray:
-        """
-        Do nothing - already encoded numerically
-        :param boards: just boards
-        :return: same boards
-        """
-        return boards
 
     def encode(self, board) -> np.ndarray:
         """
@@ -47,6 +38,14 @@ class NumericEncoder(Encoder):
         :return: same board
         """
         return board
+
+    def encode_multiple(self, boards: np.ndarray) -> np.ndarray:
+        """
+        Do nothing - already encoded numerically
+        :param boards: just boards
+        :return: same boards
+        """
+        return boards
 
 
 class OneHotEncoder(Encoder):
@@ -66,7 +65,8 @@ class OneHotEncoder(Encoder):
         self.MONEY_IDX_INC_OH = 8  # money-> 8 bits (255) [every unit has the same for player]
         self.REMAIN_IDX_INC_OH = 11  # 2^11 2048(za total annihilation)
 
-        # builds indexes for character encoding - if not using one hot encoding, max indexes are incremented by 1 from previous index, but for one hot encoding, its incremented by num bits
+        # builds indexes for character encoding - if not using one hot encoding, max indexes are incremented by 1
+        # from previous index, but for one hot encoding, its incremented by num bits
         self.P_NAME_IDX_OH = 0
         self.P_NAME_IDX_MAX_OH = self.P_NAME_IDX_INC_OH
 

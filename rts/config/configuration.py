@@ -19,8 +19,11 @@ PATH = os.path.dirname(os.path.realpath(__file__))
 # Show initial TF configuration when TF is getting initialized
 SHOW_TENSORFLOW_GPU = False
 
+# Disable TF warnings
+DISABLE_TENSORFLOW_WARNING = True
+
 # Show initial Pygame welcome message when Pygame is getting initialized
-SHOW_PYGAME_WELCOME = True
+SHOW_PYGAME_WELCOME = False
 
 # If keras should output while fitting data
 VERBOSE_MODEL_FIT = 1  # 0 = silent, 1 = progress bar, 2 = one line per epoch.
@@ -467,7 +470,7 @@ class Configuration:
                          player_config,
                          onehot_encoder,
                          player_model_file):
-                from rts.NNet import NNetWrapper as NNet
+                from rts.keras.NNet import NNetWrapper as NNet
                 from lib.MCTS import MCTS
 
                 if onehot_encoder:

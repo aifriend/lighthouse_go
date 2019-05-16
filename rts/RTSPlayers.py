@@ -14,7 +14,7 @@ import pygame
 from pygame.rect import Rect
 
 from lib.utils import dotdict
-from rts.Board import Board
+from rts.RTSLogic import RTSLogic
 from rts.config.config import CONFIG
 from rts.config.configuration import NUM_ACTS, P_NAME_IDX, A_TYPE_IDX, d_user_shortcuts, FPS, ACTS, d_a_type, ACTS_REV, \
     d_user_shortcuts_rev
@@ -180,7 +180,7 @@ class HumanRTSPlayer:
                             pygame.draw.rect(game_display, blue, rect, int(canvas_scale / 20))
 
                             # display valid actions on canvas
-                            b = Board(n)
+                            b = RTSLogic(n)
                             b.pieces = np.copy(board)
 
                             if self.USER_PLAYER == 1:

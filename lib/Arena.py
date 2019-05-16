@@ -34,7 +34,10 @@ class Arena:
         players = [self.player2, None, self.player1]
         cur_player = 1
         board = self.game.getInitBoard()
-        self.view.initView(board)
+        if verbose:
+            assert self.view
+            self.view.initView(board)
+
         it = 0
         while self.game.getGameEnded(board, cur_player) == 0:
             it += 1

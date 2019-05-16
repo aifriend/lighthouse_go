@@ -2,13 +2,14 @@ from typing import Tuple
 
 import numpy as np
 
-from rts.Board import Board
+from lib.Game import Game
+from rts.RTSLogic import RTSLogic
 from rts.config.config import CONFIG
 from rts.config.configuration import NUM_ENCODERS, NUM_ACTS, P_NAME_IDX, A_TYPE_IDX, TIME_IDX
 
 
-# noinspection PyPep8Naming,PyMethodMayBeStatic
-class RTSGame:
+# noinspection PyPep8Naming, PyMethodMayBeStatic
+class RTSGame(Game):
 
     def __init__(self) -> None:
         self.n = CONFIG.grid_size
@@ -19,7 +20,7 @@ class RTSGame:
         """
         :return: Returns new board from initial_board_config. That config can be dynamically changed as game progresses.
         """
-        b = Board(self.n)
+        b = RTSLogic(self.n)
         remaining_time = None  # when setting initial board, remaining time might be different
         for e in self.initial_board_config:
             b.pieces[e.x, e.y] = [e.player, e.a_type, e.health, e.carry, e.gold, e.timeout]
@@ -45,7 +46,7 @@ class RTSGame:
         :param action: action to apply to new board
         :return: new board with applied action
         """
-        b = Board(self.n)
+        b = RTSLogic(self.n)
         b.pieces = np.copy(board)
 
         y, x, action_index = np.unravel_index(action, [self.n, self.n, NUM_ACTS])
@@ -72,7 +73,7 @@ class RTSGame:
     def getValidMoves(self, board: np.ndarray, player: int):
 
         valids = []
-        b = Board(self.n)
+        b = RTSLogic(self.n)
         b.pieces = np.copy(board)
 
         if player == 1:
@@ -190,7 +191,7 @@ class RTSGame:
         :param player: current player
         :return: elo for current player on this board
         """
-        b = Board(self.n)
+        b = RTSLogic(self.n)
         b.pieces = np.copy(board)
 
         # can use different score functions for each player
