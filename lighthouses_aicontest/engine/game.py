@@ -15,7 +15,7 @@ for actor in actors:
 
 view = view.GameView(game)
 
-round = 0
+coach = 0
 while True:
     if view.closeEvent():
         break
@@ -28,7 +28,7 @@ while True:
     score = ""
     for i in range(len(bots)):
         score += "P%d: %d " % (i, game.players[i].score)
-    print("########### ROUND %d SCORE: %s" % (round, score))
-    round += 1
+    print("########### ROUND %d SCORE: %s" % (coach, score))
+    coach += 1
 
 view.update()

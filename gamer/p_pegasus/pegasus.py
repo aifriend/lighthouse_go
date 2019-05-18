@@ -1,8 +1,7 @@
 import random
 
-from player.p_pegasus.bot import Bot
-from player.p_pegasus.interface import Interface
-from player.p_pegasus.utils import Utils
+from gamer.p_pegasus.bot import Bot
+from gamer.p_pegasus.utils import Utils
 
 
 class Pegasus(Bot):
@@ -12,8 +11,12 @@ class Pegasus(Bot):
     NAME = "Pegasus"
     MAX_INT = 1e40
 
-    def __init__(self, init_state):
-        super(Pegasus, self).__init__(init_state)
+    def __init__(self):
+        super().__init__()
+        self.lh_dist_maps = []
+
+    def initialize(self, init_state):
+        super().initialize(init_state)
         self.lh_dist_maps = {
             lh: self._get_lh_dist_map(lh, init_state["map"])
             for lh in self.lighthouses
@@ -110,6 +113,7 @@ class Pegasus(Bot):
         for lh in _lh_states:
             _lh_states[lh]['cur_dist'] = \
                 dists_to_lhs[tuple(_lh_states[lh]["position"])]
+
         return _lh_states
 
     def _get_possible_connections(self, lh_states, orig):
@@ -148,6 +152,7 @@ class Pegasus(Bot):
             if Utils.closes_tri(lh_states, my_pos, conn):
                 self.log("CONNECT TRI: %s", str(conn))
                 return conn
+
         conn = random.choice(possible_connections)
         self.log("CONNECT RANDOM: %s", str(conn))
         return conn
@@ -187,15 +192,13 @@ class Pegasus(Bot):
                 if lh_states[dest_lh]["energy"] < state["energy"]:
                     lh_points += 500
             else:
-                possible_connections = self._get_possible_connections(
-                    lh_states, dest_lh)
+                possible_connections = self._get_possible_connections(lh_states, dest_lh)
                 lh_points += len(possible_connections) * 100
                 if len(possible_connections) > 1:
                     for orig_conn in possible_connections:
                         for dest_conn in lh_states[orig_conn]["connections"]:
                             if tuple(dest_conn) in possible_connections:
-                                tri_size = Utils.closes_tri(
-                                    lh_states, dest_conn, orig_conn, size=True)
+                                tri_size = Utils.closes_tri(lh_states, dest_conn, orig_conn, size=True)
                                 lh_points += 1000000 * tri_size
 
                 if lh_states[dest_lh]["energy"] < state["energy"]:
@@ -233,8 +236,7 @@ class Pegasus(Bot):
 
         possible_moves = self._get_possible_moves(state["position"])
         if state["energy"] < 500:
-            move, energy_gain = Utils.harvest_movement(
-                state["view"], possible_moves)
+            move, energy_gain = Utils.harvest_movement(state["view"], possible_moves)
             if energy_gain > 10:
                 self.log("MOVE TO HARVEST: %s", str(move))
                 return move
@@ -246,7 +248,3 @@ class Pegasus(Bot):
         self.log("MOVE TO LH: %s", str(move))
         return move
 
-
-if __name__ == "__main__":
-    iface = Interface(Pegasus)
-    iface.run()

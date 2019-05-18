@@ -1,4 +1,5 @@
-from __future__ import print_function
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import sys
 
@@ -17,13 +18,20 @@ class Bot(object):
     # Métodos a implementar / sobreescribir (opcionalmente)
     # ==========================================================================
 
-    def __init__(self, init_state):
+    def __init__(self):
+        self.player_num = -1
+        self.player_count = 0
+        self.init_pos = ()
+        self.map = list()
+        self.lighthouses = list()
+
+    def initialize(self, init_state):
         """Inicializar el bot: llamado al comienzo del juego."""
         self.player_num = init_state["player_num"]
         self.player_count = init_state["player_count"]
         self.init_pos = init_state["position"]
         self.map = init_state["map"]
-        self.lighthouses = map(tuple, init_state["lighthouses"])
+        self.lighthouses = init_state["lighthouses"]
 
     def play(self, state):
         """Jugar: llamado cada turno.
