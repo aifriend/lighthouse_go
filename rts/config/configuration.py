@@ -578,7 +578,7 @@ class Configuration:
                  cpuct: float = 1,
                  checkpoint: str = 'temp/',
                  load_model: bool = False,
-                 load_folder_file: Tuple[str, str] = ('temp/', 'checkpoint_13.pth.tar'),
+                 load_folder_file: Tuple[str, str] = ('temp/', 'checkpoint_0.pth.tar'),
                  num_iters_for_train_examples_history: int = 8,
                  save_train_examples: bool = False,
                  load_train_examples: bool = False,

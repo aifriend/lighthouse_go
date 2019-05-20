@@ -41,9 +41,6 @@ CONFIG = Configuration(num_iters=100,
                        num_mcts_sims=5,
                        arena_compare=7,
                        epochs=10,
-                       # load_folder_file=('temp/', 'checkpoint_2.pth.tar'),
-                       # load_train_examples=False,
-                       # save_train_examples=True,
                        initial_gold_player1=10,
                        initial_gold_player2=10)
 # Description

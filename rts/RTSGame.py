@@ -12,6 +12,7 @@ from rts.config.configuration import NUM_ENCODERS, NUM_ACTS, P_NAME_IDX, A_TYPE_
 class RTSGame(Game):
 
     def __init__(self) -> None:
+        super().__init__()
         self.n = CONFIG.grid_size
 
         self.initial_board_config = CONFIG.initial_board_config

@@ -62,8 +62,7 @@ class Arena:
 
     def playGames(self, num, verbose=False):
         """
-        Plays num games in which player1 starts num/2 games and player2 starts
-        num/2 games.
+        Plays num games in which player1 starts num/2 games and player2 starts num/2 games.
 
         Returns:
             oneWon: games won by player1

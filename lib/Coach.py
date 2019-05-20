@@ -16,7 +16,7 @@ from lib.progress.bar import Bar
 class Coach:
     """
     This class executes the self-play + learning. It uses the functions defined
-    in Game and NeuralNet. args are specified in main.py.
+    in Game and NeuralNet. args are specified in learn.py.
     """
 
     def __init__(self, game, nnet, args):
@@ -27,6 +27,7 @@ class Coach:
         self.mcts = MCTS(self.game, self.nnet, self.args)
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
+        self.curPlayer = 1
 
     def executeEpisode(self):
         """
@@ -81,7 +82,7 @@ class Coach:
             print('------ITER ' + str(i) + '------')
             # examples of the iteration
             if not self.skipFirstSelfPlay or i > 1:
-                iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
+                iteration_train_examples = deque([], maxlen=self.args.maxlenOfQueue)
 
                 eps_time = AverageMeter()
                 bar = Bar('Self Play', max=self.args.numEps)
@@ -89,7 +90,7 @@ class Coach:
 
                 for eps in range(self.args.numEps):
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
-                    iterationTrainExamples += self.executeEpisode()
+                    iteration_train_examples += self.executeEpisode()
 
                     # bookkeeping + plot progress
                     eps_time.update(time.time() - end)
@@ -101,28 +102,29 @@ class Coach:
                 bar.finish()
 
                 # save the iteration examples to the history 
-                self.trainExamplesHistory.append(iterationTrainExamples)
+                self.trainExamplesHistory.append(iteration_train_examples)
 
             if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
                 print("len(trainExamplesHistory) =", len(self.trainExamplesHistory),
                       " => remove the oldest trainExamples")
                 self.trainExamplesHistory.pop(0)
+
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
             self.saveTrainExamples(i - 1)
 
             # shuffle examples before training
-            trainExamples = []
+            train_examples = []
             for e in self.trainExamplesHistory:
-                trainExamples.extend(e)
-            shuffle(trainExamples)
+                train_examples.extend(e)
+            shuffle(train_examples)
 
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             pmcts = MCTS(self.game, self.pnet, self.args)
-
-            self.nnet.train(trainExamples)
+            # re-train network
+            self.nnet.train(train_examples)
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             print('PITTING AGAINST PREVIOUS VERSION')
@@ -139,7 +141,8 @@ class Coach:
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
 
-    def getCheckpointFile(self, iteration):
+    @staticmethod
+    def getCheckpointFile(iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'
 
     def saveTrainExamples(self, iteration):
