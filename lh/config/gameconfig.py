@@ -39,9 +39,9 @@ class GameConfig(object):
         self.players = [pos for c, pos in sorted(players)]
 
         # island
-        w = len(self.island[0])
-        h = len(self.island)
-        if not all(len(l) == w for l in self.island):
+        self.width = len(self.island[0])
+        self.height = len(self.island)
+        if not all(len(l) == self.width for l in self.island):
             raise GameError("All map rows must have the same width")
         if (not all(not i for i in self.island[0]) or
                 not all(not i for i in self.island[-1]) or

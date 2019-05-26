@@ -65,7 +65,7 @@ class Coach:
 
             r = self.game.getGameEnded(board, self.curPlayer)
 
-            if r != 0:  # not game ended
+            if r != 0:  # game ended
                 return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in train_examples]
 
     def learn(self):
@@ -122,10 +122,11 @@ class Coach:
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            pmcts = MCTS(self.game, self.pnet, self.args)
+            pmcts = MCTS(self.game, self.pnet, self.args)  # previous net
+
             # re-train network
             self.nnet.train(train_examples)
-            nmcts = MCTS(self.game, self.nnet, self.args)
+            nmcts = MCTS(self.game, self.nnet, self.args)  # new net
 
             print('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),

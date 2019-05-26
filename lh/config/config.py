@@ -5,12 +5,10 @@ from lh.config.configuration import Configuration
 # CONFIG = Configuration()
 
 # ###########################   Example learning   #################################
-"""
-CONFIG = Configuration(num_iters=10,
-                       num_eps=10,
-                       num_mcts_sims=30,
-                       epochs=100)
-"""
+CONFIG = Configuration(num_iters=10,  # iteration of episodes
+                       num_eps=10,  # episode of self-playing game
+                       num_mcts_sims=30,  # mcts open nodes
+                       epochs=100)  # complete whole dataset (in batches) for nnet to learn
 # Description
 """
 Example of longer learning with high number of eps and mcts sims.
@@ -18,6 +16,7 @@ Example of longer learning with high number of eps and mcts sims.
 
 # ################################### Run 1 #########################################
 
+"""
 CONFIG = Configuration(num_iters=100,
                        num_iters_for_train_examples_history=30,
                        num_eps=4,
@@ -26,6 +25,7 @@ CONFIG = Configuration(num_iters=100,
                        epochs=10,
                        initial_gold_player1=10,
                        initial_gold_player2=10)
+"""
 # Description
 """
 * Num iterations: Increased to 100, so graphing can be done correctly and multiple comparisons between models are done.

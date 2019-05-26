@@ -1,0 +1,105 @@
+LOGIC
+=====
+WK energy
+    _harvest_movement
+WK motion
+    _get_available_moves
+---
+LH distance
+    _get_lh_dist_map
+    _get_lh_dist
+    _to_lh_movement
+LH owner
+LH key
+LH energy
+LH connections (close-tri first?)
+    _get_possible_connections
+        math.factorial(tlh) / math.factorial(2) * math.factorial((tlh - 2)) para tlh = 6 => 720 / 2 * 24 => 720 / 48 => 15
+    _has_lhs (colinear)
+    _has_connections (intersect)
+    _closes_tri (close-tri)
+---
+IS availability
+    _get_possible_points
+
+
+ENCODING (10 positions)
+=======================
+    Encoder
+        island: 2b
+        player: 2b
+        actor-type: 2b
+        energy-lh: 12b
+        energy-w1: 7b
+        energy-w2: 7b
+        owner: 2b
+        key: 2b
+        conn: 5b
+        tri: 3b
+        time-up
+
+
+NUM ACTION (50 total moves)
+===========================
+Account for total amount of LH connections (total_LH - 1) => 5
+Account for amount of energy to attack LH: with energy in range(0-100%) => 5
+Nine relative motions (1 step in any direction) => 8
+One move of pass => 1
+
+DATA
+    INIT
+        init_state["player_num"]
+        init_state["player_count"]
+        init_state["position"]
+        init_state["map"]
+        init_state["lighthouses"]
+    TURN
+    {
+        "position": [1, 3],
+        "score": 36,
+        "energy": 66,
+        "view": [
+            [-1,-1,-1, 0,-1,-1,-1],
+            [-1, 0, 0,50,23,50,-1],
+            [-1, 0, 0,32,41, 0,-1],
+            [ 0, 0, 0, 0,50, 0, 0],
+            [-1, 0, 0, 0, 0, 0,-1],
+            [-1, 0, 0, 0, 0, 0,-1],
+            [-1,-1,-1, 0,-1,-1,-1]
+        ],
+        "lighthouses": [
+            {
+                "position": [1, 1],
+                "owner": 0,
+                "energy": 30,
+                "connections": [[1, 3]],
+                "have_key": false
+            },
+            {
+                "position": [3, 1],
+                "owner": -1,
+                "energy": 0,
+                "connections": [],
+                "have_key": false
+            },
+            {
+                "position": [2, 3],
+                "owner": 1,
+                "energy": 90,
+                "connections": [],
+                "have_key": false
+            },
+            {
+                "position": [1, 3],
+                "owner": 0,
+                "energy": 50,
+                "connections": [[1, 1]],
+                "have_key": true
+            }
+        ]
+    }
+
+
+SCORE
+=====
+Points

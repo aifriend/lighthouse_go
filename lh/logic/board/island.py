@@ -19,14 +19,14 @@ class Island(object):
             self._horizonmap.append(row)
 
         class _Energy(object):
-            def __getitem__(self, pos):
+            def __getitem__(unused, pos):
                 xx, yy = pos
                 if self[pos]:
                     return self._energymap[yy][xx]
                 else:
                     return 0
 
-            def __setitem__(self, pos, val):
+            def __setitem__(unused, pos, val):
                 xx, yy = pos
                 if val > Island.MAX_ENERGY:
                     val = Island.MAX_ENERGY

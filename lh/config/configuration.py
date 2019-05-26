@@ -36,16 +36,20 @@ FPS = 1000
 # ##################################
 
 # Defining number of encoders
-NUM_ENCODERS = 6  # player_name, act_type, health, carrying, money, remaining_time
-# player_name, act_type, energy, money, remaining_time
+NUM_ENCODERS = 11
 
 # Setting indexes to each encoder
-P_NAME_IDX = 0
-A_TYPE_IDX = 1
-HEALTH_IDX = 2  # energy
-# CARRY_IDX = 3
-MONEY_IDX = 4
-TIME_IDX = 5
+ISLAND_IDX = 0
+P_NAME_IDX = 1
+A_TYPE_IDX = 2
+ENERGY_W1_IDX = 3
+ENERGY_W2_IDX = 4
+LH_ENERGY_IDX = 5
+LH_OWNER_IDX = 6
+LH_KEY_IDX = 7
+LH_CONN_IDX = 8
+LH_TRI_IDX = 9
+TIME_IDX = 10
 
 # ##################################
 # ########### ACTORS ###############
@@ -53,16 +57,14 @@ TIME_IDX = 5
 
 # Dictionary for actors
 d_a_type = dotdict({
-    'Gold': 1,  # energy
-    'Work': 2,  # work
-    'Barr': 3,  # barr
+    'Work': 1,  # work
+    'Lighthouse': 2,  # lighthouse
 })
 
 # Reverse dictionary for actors
 d_type_rev = dotdict({
-    1: 'Gold',
-    2: 'Work',
-    3: 'Barr',
+    1: 'Work',
+    2: 'Lighthouse',
 })
 
 # ##################################
@@ -71,84 +73,67 @@ d_type_rev = dotdict({
 
 # Dictionary for actions and which actor can execute them
 d_acts = dotdict({
-    1: [],  # Gold
-    2: ['up', 'down', 'left', 'right', 'mine_resources', 'return_resources', 'barracks_up', 'barracks_down',
-        'barracks_right', 'barracks_left', 'idle', 'heal_up', 'heal_down', 'heal_right', 'heal_left'],  # Work
-    3: ['idle', 'heal_up', 'heal_down', 'heal_right', 'heal_left'],  # Barr
+    1: ["pass", "up", "down", "right", "left", "upright", "upleft", "downright", "downleft", "attack", "connect"],
+    # Work
+    2: [],  # Lighthouse
 })
 
 # Reverse dictionary for actions
 d_acts_int = dotdict({
-    1: [],  # Gold
-    2: [1, 2, 3, 4, 5, 6, 19, 20, 21, 22, 23, 24, 25, 26, 0, 27, 28, 29, 30],  # Work
-    3: [15, 16, 17, 18, 0, 27, 28, 29, 30],  # Barr
+    1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],  # Work
+    2: [],  # Lighthouse
 })
 
 # Defining all actions
 ACTS = {
-    "idle": 0,
+    "pass": 0,
 
     "up": 1,
     "down": 2,
     "right": 3,
     "left": 4,
+    "upright": 5,
+    "upleft": 6,
+    "downright": 7,
+    "downleft": 8,
 
-    "mine_resources": 5,
-    "return_resources": 6,
+    "attack10": 9,
+    "attack30": 10,
+    "attack60": 11,
+    "attack80": 12,
+    "attack100": 13,
 
-    "attack_up": 7,
-    "attack_down": 8,
-    "attack_right": 9,
-    "attack_left": 10,
-
-    "npc_up": 11,
-    "npc_down": 12,
-    "npc_right": 13,
-    "npc_left": 14,
-
-    "barracks_up": 19,
-    "barracks_down": 20,
-    "barracks_right": 21,
-    "barracks_left": 22,
-
-    "heal_up": 27,
-    "heal_down": 28,
-    "heal_right": 29,
-    "heal_left": 30
-
+    "connect0": 14,
+    "connect1": 15,
+    "connect2": 16,
+    "connect3": 17,
+    "connect4": 18,
 }
 
 # Reverse dictionary for all actions
 ACTS_REV = {
-    0: "idle",
+    0: "pass",
 
     1: "up",
     2: "down",
     3: "right",
     4: "left",
+    5: "upright",
+    6: "upleft",
+    7: "downright",
+    8: "downleft",
 
-    5: "mine_resources",
-    6: "return_resources",
+    9: "attack10",
+    10: "attack30",
+    11: "attack60",
+    12: "attack80",
+    13: "attack100",
 
-    7: "attack_up",
-    8: "attack_down",
-    9: "attack_right",
-    10: "attack_left",
-
-    11: "npc_up",
-    12: "npc_down",
-    13: "npc_right",
-    14: "npc_left",
-
-    19: "barracks_up",
-    20: "barracks_down",
-    21: "barracks_right",
-    22: "barracks_left",
-
-    27: "heal_up",
-    28: "heal_down",
-    29: "heal_right",
-    30: "heal_left"
+    14: "connect0",
+    15: "connect1",
+    16: "connect2",
+    17: "connect3",
+    18: "connect4",
 }
 
 # Count of all actions
@@ -246,8 +231,6 @@ class Configuration:
             self.batch_size = batch_size  # how many train examples are taken together for learning
             self.cuda = cuda  # this is only relevant when using TF GPU
             self.num_channels = num_channels  # used by nnet conv layers
-
-            # Should one-hot encoder be used
             self.encoder = OneHotEncoder()
 
     class _GameConfig:
@@ -328,17 +311,17 @@ class Configuration:
             })
 
             self.acts_enabled = dotdict(acts_enabled or {
-                "idle": False,
+                "pass": True,
                 "up": True,
                 "down": True,
                 "right": True,
                 "left": True,
-                "mine_resources": True,
-                "return_resources": True,
+                "upright": True,
+                "upleft": True,
+                "downright": True,
+                "downleft": True,
                 "attack": True,
-                "npc": True,
-                "barracks": True,
-                "heal": True
+                "connect": True
             })
 
             self.score_function = score_function
@@ -447,7 +430,6 @@ class Configuration:
             self.a_type = a_type  # 'Gold'...
 
     def __init__(self,
-                 grid_size=8,
                  learn_visibility=0,
                  pit_visibility=4,
 
@@ -511,9 +493,9 @@ class Configuration:
 
                  initial_board_config: List[BoardTile] = None):
         """
-        :param grid_size: Grid size of game for example 8,6...
         :param learn_visibility: How much console should output while running learn. If visibility.verbose > 3, Pygame is shown
         :param pit_visibility: How much console should output while running pit. If visibility.verbose > 3, Pygame is shown
+        :param board_config_file: Board configuration from file
 
         :param money_increment_player1: How much money player should gain when worker returns gold coins
         :param initial_gold_player1: How much initial gold should player have
@@ -643,7 +625,7 @@ class Configuration:
         self.config_file_pit = "temp/config_pit.csv"
         self.config_file_learn = "temp/config_learn.csv"
 
-        self.grid_size = grid_size
+        self.board_file_path = "maps/island.txt"
 
         self.visibility = 4
         self._pit_visibility = pit_visibility
@@ -761,3 +743,6 @@ class Configuration:
         else:
             print("Unrecognised runner. Returning")
             exit(1)
+
+    def set_board(self, path_to_board=None):
+        self.board_file_path = path_to_board

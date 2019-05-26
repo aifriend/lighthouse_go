@@ -8,65 +8,62 @@ from lh.config.configuration import NUM_ENCODERS, NUM_ACTS, P_NAME_IDX, A_TYPE_I
 from lib.Game import Game
 
 
-# noinspection PyPep8Naming, PyMethodMayBeStatic
 class LHGame(Game):
-
     def __init__(self) -> None:
         super().__init__()
-        self.n = CONFIG.grid_size
+
         self.initial_board_config = CONFIG.initial_board_config
+
+        self.logic = LHLogic()
 
     def getInitBoard(self) -> np.ndarray:
         """
         :return: Returns new board from initial_board_config. That config can be dynamically changed as game progresses.
         """
-        b = LHLogic(self.n)
         remaining_time = None  # when setting initial board, remaining time might be different
         for e in self.initial_board_config:
-            b.pieces[e.x, e.y] = [e.player, e.a_type, e.health, e.carry, e.gold, e.timeout]
+            self.logic.pieces[e.x, e.y] = [e.player, e.a_type, e.health, e.carry, e.gold, e.timeout]
             remaining_time = e.timeout
 
         # remaining time is stored in all squares
-        b.pieces[:, :, TIME_IDX] = remaining_time
+        self.logic.pieces[:, :, TIME_IDX] = remaining_time
 
-        return np.array(b.pieces)
+        return np.array(self.logic.pieces)
 
     def getBoardSize(self) -> Tuple[int, int, int]:
         # (a,b) tuple
         return self.n, self.n, NUM_ENCODERS
 
-    def getActionSize(self) -> int:
-        return self.n * self.n * NUM_ACTS + 1
-
     def getNextState(self, board: np.ndarray, player: int, action: int) -> Tuple[np.ndarray, int]:
         """
         Gets next state for board. It also updates tick for board as game tick iterations are transfered
-        within board as 6. parameter
+        within board as the last encoded parameter
 
         :param board: current board
         :param player: player executing action
         :param action: action to apply to new board
         :return: new board with applied action
         """
-        b = LHLogic(self.n)
-        b.pieces = np.copy(board)
+        self.logic.pieces = np.copy(board)
 
-        y, x, action_index = np.unravel_index(action, [self.n, self.n, NUM_ACTS])
+        y, x, action_index = np.unravel_index(action, [NUM_ACTS])
         move = (x, y, action_index)
 
         # first execute move, then run time function to destroy any actors if needed
-        b.execute_move(move, player)
+        self.logic.execute_move(move, player)
 
         # get config for timeout
         # update timer on every tile:
-        b.pieces[:, :, TIME_IDX] -= 1
+        self.logic.pieces[:, :, TIME_IDX] -= 1
 
-        return b.pieces, -player
+        return self.logic.pieces, -player
 
-    def getValidMoves(self, board: np.ndarray, player: int):
-        valids = []
-        b = LHLogic(self.n)
-        b.pieces = np.copy(board)
+    def getActionSize(self) -> int:
+        return NUM_ACTS
+
+    def getValidMoves(self, board: np.ndarray, player: int) -> np.ndarray:
+        valids = [0] * NUM_ACTS
+        self.logic.pieces = np.copy(board)
 
         if player == 1:
             config = CONFIG.player1_config
@@ -75,11 +72,9 @@ class LHGame(Game):
 
         for y in range(self.n):
             for x in range(self.n):
-                if b[x][y][P_NAME_IDX] == player and b[x][y][A_TYPE_IDX] != 1:  # for this player and not Gold
-                    valids.extend(b.get_moves_for_square(x, y, config=config))
-                else:
-                    valids.extend([0] * NUM_ACTS)
-        valids.append(0)  # because of that +1 in action Size
+                if self.logic[x][y][P_NAME_IDX] == player and \
+                        self.logic[x][y][A_TYPE_IDX] == 1:  # for this player and only worker type
+                    valids = self.logic.get_moves_for_square(x, y, config=config)
 
         return np.array(valids)
 
@@ -96,7 +91,6 @@ class LHGame(Game):
         :param player: current player
         :return: real number on interval [-1,1] - return 0 if not ended, 1 if player 1 won, -1 if player 1 lost, 0.001 if tie
         """
-
         n = board.shape[0]
 
         # detect timeout
@@ -135,14 +129,14 @@ class LHGame(Game):
         # continue game
         return 0
 
-    def getCanonicalForm(self, board: np.ndarray, player: int):
+    def getCanonicalForm(self, board: np.ndarray, player: int) -> np.ndarray:
         b = np.copy(board)
         b[:, :, P_NAME_IDX] = b[:, :, P_NAME_IDX] * player
         return b
 
     def getSymmetries(self, board: np.ndarray, pi):
         # mirror, rotational
-        assert (len(pi) == self.n * self.n * NUM_ACTS + 1)  # 1 for pass
+        assert (len(pi) == self.n * self.n * NUM_ACTS)
         pi_board = np.reshape(pi[:-1], (self.n, self.n, NUM_ACTS))
         return_list = []
         for i in range(1, 5):
@@ -152,13 +146,14 @@ class LHGame(Game):
                 if j:
                     newB = np.fliplr(newB)
                     newPi = np.fliplr(newPi)
-                return_list += [(newB, list(newPi.ravel()) + [pi[-1]])]
+                return_list += [(newB, list(newPi.ravel()))]
+
         return return_list
 
-    def stringRepresentation(self, board: np.ndarray):
+    def stringRepresentation(self, board: np.ndarray) -> bytes:
         return board.tostring()
 
-    def getScore(self, board: np.array, player: int):
+    def getScore(self, board: np.array, player: int) -> int:
         """
         Uses one of 3 elo functions that determine better player
 
@@ -166,8 +161,7 @@ class LHGame(Game):
         :param player: current player
         :return: elo for current player on this board
         """
-        b = LHLogic(self.n)
-        b.pieces = np.copy(board)
+        self.logic.pieces = np.copy(board)
 
         # can use different score functions for each player
         if player == 1:
@@ -176,8 +170,8 @@ class LHGame(Game):
             score_function = CONFIG.player2_config.score_function
 
         if score_function == 1:
-            return b.get_health_score(player)
+            return self.logic.get_health_score(player)
         elif score_function == 2:
-            return b.get_money_score(player)
+            return self.logic.get_money_score(player)
         else:
-            return b.get_combined_score(player)
+            return self.logic.get_combined_score(player)

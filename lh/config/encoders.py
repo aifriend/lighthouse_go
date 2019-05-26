@@ -8,9 +8,7 @@ class Encoder:
     Defines one-hot encoder
 
     One-hot encoder uses binary representation of integer numbers, with exception of player name, which is processed separately
-
     """
-
     def __init__(self):
         self.NUM_ENCODERS = None
 
@@ -33,33 +31,51 @@ class OneHotEncoder(Encoder):
     def _build_indexes(self):
         """
         Defines encoding indexes - you may change them as you would like, but do not reduce them below their actual encoders.
-        For example - if health is represented using 5 bits, don't set max_health_amount of actor to >2^5 - 1
         """
-        self.P_NAME_IDX_INC_OH = 2  # playerName 2 bit - 00(neutral), 01(1) or 10(-1),
-        self.A_TYPE_IDX_INC_OH = 3  # actor type -> 3 bit,
-        self.HEALTH_IDX_INC_OH = 5  # health-> 5 bit,
-        self.CARRY_IDX_INC_OH = 1  # carrying-> 1 bit,
-        self.MONEY_IDX_INC_OH = 8  # money-> 8 bits (255) [every unit has the same for player]
+        self.ISLAND_IDX_INC_OH = 2  # island to be played 2 bit - 00(not playable), 01(island playable) or 10(lh)
+        self.P_NAME_IDX_INC_OH = 2  # playerName 2 bit - 00(neutral), 01(1) or 10(-1) or 11(both)
+        self.A_TYPE_IDX_INC_OH = 2  # actor type -> 2 bit,
+        self.ENERGY_W1_IDX_INC_OH = 12  # work1 energy
+        self.ENERGY_W2_IDX_INC_OH = 12  # work2 energy
+        self.LH_ENERGY_IDX_INC_OH = 12  # lighthouse energy
+        self.LH_OWNER_IDX_INC_OH = 2  # carrying
+        self.LH_KEY_IDX_INC_OH = 2  # player has lighthouse key
+        self.LH_CONN_IDX_INC_OH = 5  # lighthouse laser connections witho other lhs
+        self.LH_TRI_IDX_INC_OH = 3  # poligon areas between three lasers
         self.REMAIN_IDX_INC_OH = 11  # 2^11 2048(za total annihilation)
 
-        # builds indexes for character encoding - if not using one hot encoding, max indexes are incremented by 1
-        # from previous index, but for one hot encoding, its incremented by num bits
-        self.P_NAME_IDX_OH = 0
-        self.P_NAME_IDX_MAX_OH = self.P_NAME_IDX_INC_OH
+        # builds indexes for character encoding
+        self.ISLAND_IDX_OH = 0
+        self.ISLAND_IDX_MAX_OH = self.ISLAND_IDX_INC_OH
+
+        self.P_NAME_IDX_OH = self.ISLAND_IDX_MAX_OH
+        self.P_NAME_IDX_MAX_OH = self.P_NAME_IDX_OH + self.P_NAME_IDX_INC_OH
 
         self.A_TYPE_IDX_OH = self.P_NAME_IDX_MAX_OH
         self.A_TYPE_IDX_MAX_OH = self.A_TYPE_IDX_OH + self.A_TYPE_IDX_INC_OH
 
-        self.HEALTH_IDX_OH = self.A_TYPE_IDX_MAX_OH
-        self.HEALTH_IDX_MAX_OH = self.HEALTH_IDX_OH + self.HEALTH_IDX_INC_OH
+        self.ENERGY_W1_IDX_OH = self.A_TYPE_IDX_MAX_OH
+        self.ENERGY_W1_IDX_MAX_OH = self.ENERGY_W1_IDX_OH + self.ENERGY_W1_IDX_INC_OH
 
-        self.CARRY_IDX_OH = self.HEALTH_IDX_MAX_OH
-        self.CARRY_IDX_MAX_OH = self.CARRY_IDX_OH + self.CARRY_IDX_INC_OH
+        self.ENERGY_W2_IDX_OH = self.ENERGY_W1_IDX_MAX_OH
+        self.ENERGY_W2_IDX_MAX_OH = self.ENERGY_W2_IDX_OH + self.ENERGY_W2_IDX_INC_OH
 
-        self.MONEY_IDX_OH = self.CARRY_IDX_MAX_OH
-        self.MONEY_IDX_MAX_OH = self.MONEY_IDX_OH + self.MONEY_IDX_INC_OH
+        self.LH_ENERGY_IDX_OH = self.ENERGY_W2_IDX_MAX_OH
+        self.LH_ENERGY_IDX_MAX_OH = self.LH_ENERGY_IDX_OH + self.LH_ENERGY_IDX_INC_OH
 
-        self.REMAIN_IDX_OH = self.MONEY_IDX_MAX_OH
+        self.LH_OWNER_IDX_OH = self.LH_ENERGY_IDX_MAX_OH
+        self.LH_OWNER_IDX_MAX_OH = self.LH_OWNER_IDX_OH + self.LH_OWNER_IDX_INC_OH
+
+        self.LH_KEY_IDX_OH = self.LH_OWNER_IDX_MAX_OH
+        self.LH_KEY_IDX_MAX_OH = self.LH_KEY_IDX_OH + self.LH_KEY_IDX_INC_OH
+
+        self.LH_CONN_IDX_OH = self.LH_KEY_IDX_MAX_OH
+        self.LH_CONN_IDX_MAX_OH = self.LH_CONN_IDX_OH + self.LH_CONN_IDX_INC_OH
+
+        self.LH_TRI_IDX_OH = self.LH_CONN_IDX_MAX_OH
+        self.LH_TRI_IDX_MAX_OH = self.LH_TRI_IDX_OH + self.LH_TRI_IDX_INC_OH
+
+        self.REMAIN_IDX_OH = self.LH_TRI_IDX_MAX_OH
         self.REMAIN_IDX_MAX_OH = self.REMAIN_IDX_OH + self.REMAIN_IDX_INC_OH
 
         self.NUM_ENCODERS = self.REMAIN_IDX_MAX_OH
@@ -107,7 +123,8 @@ class OneHotEncoder(Encoder):
         :param board: normal board
         :return: new encoded board
         """
-        from lh.config.configuration import P_NAME_IDX, A_TYPE_IDX, HEALTH_IDX, CARRY_IDX, MONEY_IDX, TIME_IDX
+        from lh.config.configuration import ISLAND_IDX, P_NAME_IDX, A_TYPE_IDX, ENERGY_W1_IDX, ENERGY_W2_IDX, \
+            LH_ENERGY_IDX, LH_OWNER_IDX, LH_KEY_IDX, LH_CONN_IDX, LH_TRI_IDX, TIME_IDX
 
         n = board.shape[0]
 
@@ -121,16 +138,26 @@ class OneHotEncoder(Encoder):
                 elif board[x, y, P_NAME_IDX] == -1:
                     player = 2
 
+                b[x, y][self.ISLAND_IDX_OH:self.ISLAND_IDX_MAX_OH] = \
+                    self.itb(board[x, y, ISLAND_IDX], self.ISLAND_IDX_INC_OH)
                 b[x, y][self.P_NAME_IDX_OH:self.P_NAME_IDX_MAX_OH] = \
                     self.itb(player, self.P_NAME_IDX_INC_OH)
                 b[x, y][self.A_TYPE_IDX_OH:self.A_TYPE_IDX_MAX_OH] = \
                     self.itb(board[x, y, A_TYPE_IDX], self.A_TYPE_IDX_INC_OH)
-                b[x, y][self.HEALTH_IDX_OH:self.HEALTH_IDX_MAX_OH] = \
-                    self.itb(board[x, y, HEALTH_IDX], self.HEALTH_IDX_INC_OH)
-                b[x, y][self.CARRY_IDX_OH:self.CARRY_IDX_MAX_OH] = \
-                    self.itb(board[x, y, CARRY_IDX], self.CARRY_IDX_INC_OH)
-                b[x, y][self.MONEY_IDX_OH:self.MONEY_IDX_MAX_OH] = \
-                    self.itb(board[x, y, MONEY_IDX], self.MONEY_IDX_INC_OH)
+                b[x, y][self.ENERGY_W1_IDX_OH:self.ENERGY_W1_IDX_MAX_OH] = \
+                    self.itb(board[x, y, ENERGY_W1_IDX], self.ENERGY_W1_IDX_INC_OH)
+                b[x, y][self.ENERGY_W2_IDX_OH:self.ENERGY_W2_IDX_MAX_OH] = \
+                    self.itb(board[x, y, ENERGY_W2_IDX], self.ENERGY_W2_IDX_INC_OH)
+                b[x, y][self.LH_ENERGY_IDX_OH:self.LH_ENERGY_IDX_MAX_OH] = \
+                    self.itb(board[x, y, LH_ENERGY_IDX], self.LH_ENERGY_IDX_INC_OH)
+                b[x, y][self.LH_OWNER_IDX_OH:self.LH_OWNER_IDX_MAX_OH] = \
+                    self.itb(board[x, y, LH_OWNER_IDX], self.LH_OWNER_IDX_INC_OH)
+                b[x, y][self.LH_KEY_IDX_OH:self.LH_KEY_IDX_MAX_OH] = \
+                    self.itb(board[x, y, LH_KEY_IDX], self.LH_KEY_IDX_INC_OH)
+                b[x, y][self.LH_CONN_IDX_OH:self.LH_CONN_IDX_MAX_OH] = \
+                    self.itb(board[x, y, LH_CONN_IDX], self.LH_CONN_IDX_INC_OH)
+                b[x, y][self.LH_TRI_IDX_OH:self.LH_TRI_IDX_MAX_OH] = \
+                    self.itb(board[x, y, LH_TRI_IDX], self.LH_TRI_IDX_INC_OH)
                 b[x, y][self.REMAIN_IDX_OH:self.REMAIN_IDX_MAX_OH] = \
                     self.itb(board[x, y, TIME_IDX], self.REMAIN_IDX_INC_OH)
         return b
