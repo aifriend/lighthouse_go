@@ -36,7 +36,7 @@ class GameConfig(object):
             self.island.append(row)
 
         # players
-        self.players = [pos for c, pos in sorted(players)]
+        self.players = [(c, pos) for c, pos in sorted(players)]
 
         # island
         self.width = len(self.island[0])

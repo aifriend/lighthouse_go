@@ -1,15 +1,14 @@
 # noinspection PyUnresolvedReferences
-import gc
 import os
 
+import gc
 import numpy as np
 import tensorflow as tf
 # noinspection PyUnresolvedReferences
 import unreal_engine as ue
+from MCTS import MCTS
 # noinspection PyUnresolvedReferences
 from TFPluginAPI import TFPluginAPI
-
-from MCTS import MCTS
 from rts.RTSGame import RTSGame
 from rts.keras.NNet import NNetWrapper as NNet
 from rts.src.config import ACTS_REV, NUM_ACTS

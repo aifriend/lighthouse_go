@@ -2,8 +2,9 @@ from lighthouses_aicontest.nengine.config import MoveError
 
 
 class Player(object):
-    def __init__(self, game, num, pos):
+    def __init__(self, game, letter, num, pos):
         self.num = num
+        self.letter = letter
         self.name = "Player %d" % num
         self.game = game
         self.pos = pos

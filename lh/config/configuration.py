@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple
+from typing import Tuple
 
 import numpy as np
 
@@ -36,20 +36,27 @@ FPS = 1000
 # ##################################
 
 # Defining number of encoders
-NUM_ENCODERS = 11
+NUM_ENCODERS = 12
 
 # Setting indexes to each encoder
 ISLAND_IDX = 0
+ENERGY_IDX = 0
+
 P_NAME_IDX = 1
-A_TYPE_IDX = 2
-ENERGY_W1_IDX = 3
-ENERGY_W2_IDX = 4
-LH_ENERGY_IDX = 5
-LH_OWNER_IDX = 6
-LH_KEY_IDX = 7
-LH_CONN_IDX = 8
-LH_TRI_IDX = 9
-TIME_IDX = 10
+A_TYPE = 2
+
+PL_SCORE_W1_IDX = 3
+PL_SCORE_W2_IDX = 4
+PL_ENERGY_W1_IDX = 5
+PL_ENERGY_W2_IDX = 6
+
+LH_ENERGY_IDX = 8
+LH_OWNER_IDX = 9
+LH_KEY_IDX = 10
+LH_CONN_IDX = 11
+LH_TRI_IDX = 12
+
+TIME_IDX = 13
 
 # ##################################
 # ########### ACTORS ###############
@@ -57,14 +64,14 @@ TIME_IDX = 10
 
 # Dictionary for actors
 d_a_type = dotdict({
-    'Work': 1,  # work
-    'Lighthouse': 2,  # lighthouse
+    'Work': 1,
+    'Lighthouse': 2
 })
 
 # Reverse dictionary for actors
 d_type_rev = dotdict({
     1: 'Work',
-    2: 'Lighthouse',
+    2: 'Lighthouse'
 })
 
 # ##################################
@@ -73,15 +80,14 @@ d_type_rev = dotdict({
 
 # Dictionary for actions and which actor can execute them
 d_acts = dotdict({
-    1: ["pass", "up", "down", "right", "left", "upright", "upleft", "downright", "downleft", "attack", "connect"],
-    # Work
-    2: [],  # Lighthouse
+    1: ["pass", "up", "down", "right", "left", "upright", "upleft", "downright", "downleft",
+        "attack10", "attack30", "attack60", "attack80", "attack100",
+        "connect0", "connect1", "connect2", "connect3", "connect4"],
 })
 
 # Reverse dictionary for actions
 d_acts_int = dotdict({
-    1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],  # Work
-    2: [],  # Lighthouse
+    1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],  # Work
 })
 
 # Defining all actions
@@ -107,7 +113,7 @@ ACTS = {
     "connect1": 15,
     "connect2": 16,
     "connect3": 17,
-    "connect4": 18,
+    "connect4": 18
 }
 
 # Reverse dictionary for all actions
@@ -133,7 +139,7 @@ ACTS_REV = {
     15: "connect1",
     16: "connect2",
     17: "connect3",
-    18: "connect4",
+    18: "connect4"
 }
 
 # Count of all actions
@@ -246,7 +252,6 @@ class Configuration:
                      a_max_health,
                      a_cost,
                      acts_enabled,
-                     score_function,
                      timeout):
             self.encoder = OneHotEncoder()
 
@@ -323,8 +328,6 @@ class Configuration:
                 "attack": True,
                 "connect": True
             })
-
-            self.score_function = score_function
 
     class _PitArgs:
         def __init__(self,
@@ -418,20 +421,10 @@ class Configuration:
             self.save_train_examples = save_train_examples
             self.load_train_examples = load_train_examples
 
-    class BoardTile:
-        def __init__(self,
-                     player: int,
-                     x: int,
-                     y: int,
-                     a_type: str):
-            self.player = player
-            self.x = x
-            self.y = y
-            self.a_type = a_type  # 'Gold'...
-
     def __init__(self,
                  learn_visibility=0,
                  pit_visibility=4,
+                 timeout_player=200,
 
                  money_increment_player1: int = 3,
                  initial_gold_player1: int = 1,
@@ -444,8 +437,6 @@ class Configuration:
                  a_max_health_player1: dict = None,
                  a_cost_player1: dict = None,
                  acts_enabled_player1: dict = None,
-                 score_function_player1: int = 3,
-                 timeout_player1: int = 200,
                  player1_model_file: str = "best_player1.pth.tar",
 
                  money_increment_player2: int = 3,
@@ -459,8 +450,6 @@ class Configuration:
                  a_max_health_player2: dict = None,
                  a_cost_player2: dict = None,
                  acts_enabled_player2: dict = None,
-                 score_function_player2: int = 3,
-                 timeout_player2: int = 200,
                  player2_model_file: str = "best_player2.pth.tar",
 
                  num_iters: int = 4,
@@ -489,13 +478,12 @@ class Configuration:
                  epochs: int = 30,
                  batch_size: int = 256,
                  cuda: bool = True,
-                 num_channels: int = 128,
-
-                 initial_board_config: List[BoardTile] = None):
+                 num_channels: int = 128
+                 ):
         """
         :param learn_visibility: How much console should output while running learn. If visibility.verbose > 3, Pygame is shown
         :param pit_visibility: How much console should output while running pit. If visibility.verbose > 3, Pygame is shown
-        :param board_config_file: Board configuration from file
+        :param timeout_player: After what time game will timeout if 'useTimeout' is set to true
 
         :param money_increment_player1: How much money player should gain when worker returns gold coins
         :param initial_gold_player1: How much initial gold should player have
@@ -537,8 +525,6 @@ class Configuration:
                 "heal": True
             }
             ``
-        :param score_function_player1: which function to use (1, 2 or 3)
-        :param timeout_player1: After what time game will timeout if 'useTimeout' is set to true
         :param player1_model_file: Filename in temp folder that player 1 nnet player uses
 
         :param money_increment_player2: How much money player should gain when worker returns gold coins
@@ -581,8 +567,6 @@ class Configuration:
                 "heal": True
             }
             ``
-        :param score_function_player2: which function to use (1, 2 or 3)
-        :param timeout_player2: After what time game will timeout if 'useTimeout' is set to true
         :param player2_model_file: Filename in temp folder that player 2 nnet player uses
 
 
@@ -614,11 +598,6 @@ class Configuration:
         :param cuda: Whether to use cuda if tensorflow gpu is installed and GPU supports cuda operations
         :param num_channels: Number of channels in NNet Model config
 
-        :param initial_board_config: Configuration of initial non-empty tiles for actors. See its default values to override.
-            ``Example: initial_board_config=[
-                Configuration.BoardTile(1,4,4,'Gold'),
-                Configuration.BoardTile(-1,4,5,'Gold'),
-            ``
         """
 
         # output for game stats during playing games (game_episode, game iteration, player name, action executed, action_name, action_direction, player_score...
@@ -630,6 +609,7 @@ class Configuration:
         self.visibility = 4
         self._pit_visibility = pit_visibility
         self._learn_visibility = learn_visibility
+        self.timeout = timeout_player
 
         self.player1_config = self._GameConfig(
             money_increment=money_increment_player1,
@@ -642,9 +622,7 @@ class Configuration:
             destroy_all=destroy_all_player1,
             a_max_health=a_max_health_player1,
             a_cost=a_cost_player1,
-            acts_enabled=acts_enabled_player1,
-            score_function=score_function_player1,
-            timeout=timeout_player1)
+            acts_enabled=acts_enabled_player1)
 
         self.player2_config = self._GameConfig(
             money_increment=money_increment_player2,
@@ -657,9 +635,7 @@ class Configuration:
             destroy_all=destroy_all_player2,
             a_max_health=a_max_health_player2,
             a_cost=a_cost_player2,
-            acts_enabled=acts_enabled_player2,
-            score_function=score_function_player2,
-            timeout=timeout_player2)
+            acts_enabled=acts_enabled_player2)
 
         self.learn_args = self._LearnArgs(
             num_iters=num_iters,
@@ -695,45 +671,6 @@ class Configuration:
             cuda=cuda,
             num_channels=num_channels
         )
-
-        if initial_board_config:
-            self.initial_board_config = []
-            for board_tile in initial_board_config:
-                self.initial_board_config.append(dotdict({
-                    'x': board_tile.x,
-                    'y': board_tile.y,
-                    'player': board_tile.player,
-                    'a_type': d_a_type[board_tile.a_type],
-                    'health': self.player1_config.a_max_health[
-                        d_a_type[board_tile.a_type]] if board_tile.player == 1 else self.player2_config.a_max_health[
-                        d_a_type[board_tile.a_type]],
-                    'carry': 0,
-                    'gold': self.player1_config.INITIAL_GOLD if board_tile.player == 1 else self.player2_config.INITIAL_GOLD,
-                    'timeout': self.player1_config.TIMEOUT if board_tile.player == 1 else self.player2_config.TIMEOUT
-                }))
-        else:
-            self.initial_board_config = initial_board_config or [
-                dotdict({
-                    'x': int(self.grid_size / 2) - 1,
-                    'y': int(self.grid_size / 2),
-                    'player': 1,
-                    'a_type': d_a_type['Gold'],
-                    'health': self.player1_config.a_max_health[d_a_type['Gold']],
-                    'carry': 0,
-                    'gold': self.player1_config.INITIAL_GOLD,
-                    'timeout': self.player1_config.TIMEOUT
-                }),
-                dotdict({
-                    'x': int(self.grid_size / 2),
-                    'y': int(self.grid_size / 2),
-                    'player': -1,
-                    'a_type': d_a_type['Gold'],
-                    'health': self.player2_config.a_max_health[d_a_type['Gold']],
-                    'carry': 0,
-                    'gold': self.player2_config.INITIAL_GOLD,
-                    'timeout': self.player2_config.TIMEOUT
-                }),
-            ]
 
     def set_runner(self, runner: str):
         if runner == 'pit':

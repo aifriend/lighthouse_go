@@ -1,3 +1,6 @@
+import numpy as np
+
+from lh.config.configuration import ISLAND_IDX, ENERGY_IDX
 from lh.logic.utils.geom import distt
 
 
@@ -6,10 +9,10 @@ class Island(object):
     HORIZON = 3
 
     def __init__(self, island_map):
-        self._island = island_map
-        self.h = len(self._island)
-        self.w = len(self._island[0])
-        self._energymap = [[0] * self.w for _ in range(self.h)]
+        self._island = np.array(island_map)
+        h = len(self._island)
+        w = len(self._island[0])
+        self._energymap = self._island
         self._horizonmap = []
         dist = self.HORIZON
         for y in range(-dist, dist + 1):
@@ -47,19 +50,20 @@ class Island(object):
     def energy(self):
         return self._energy
 
-    def get_view(self, pos):
-        px, py = pos
+    @staticmethod
+    def from_array(pieces):
+        return Island(pieces[:, :, ISLAND_IDX])
+
+    def encode_view(self, board, pose) -> np.array:
+        px, py = pose
         dist = self.HORIZON
-        view = []
+        board[:, :, ENERGY_IDX] = 0
         for y in range(-dist, dist + 1):
-            row = []
             for x in range(-dist, dist + 1):
                 if self._horizonmap[y + dist][x + dist]:
-                    row.append(self.energy[px + x, py + y])
-                else:
-                    row.append(-1)
-            view.append(row)
-        return view
+                    board[y, x, ENERGY_IDX] = self.energy[px + x, py + y]
+
+        return board
 
     @property
     def map(self):

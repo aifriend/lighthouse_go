@@ -5,12 +5,11 @@ Defined NNet model used for game TD2020
 
 import os
 
+from rts.config.config import CONFIG
+from rts.config.configuration import USE_TF_CPU, SHOW_TENSORFLOW_GPU, DISABLE_TENSORFLOW_WARNING
 from tensorflow.python.keras import Input, Model
 from tensorflow.python.keras.layers import Conv2D, BatchNormalization, Activation, Dense, Dropout, Flatten, Reshape
 from tensorflow.python.keras.optimizers import Adam
-
-from rts.config.config import CONFIG
-from rts.config.configuration import USE_TF_CPU, SHOW_TENSORFLOW_GPU, DISABLE_TENSORFLOW_WARNING
 
 if USE_TF_CPU:
     print("Using TensorFlow CPU")

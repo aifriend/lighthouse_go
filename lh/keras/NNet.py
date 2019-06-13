@@ -51,6 +51,7 @@ class NNetWrapper(NeuralNet):
         """
         Predicts action.
         It encodes board with encoder, that has been used for learning.
+
         :param board: specific board
         :param player: specific player
         :return: vector of predicted actions and win prediction (Pi, V)

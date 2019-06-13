@@ -155,7 +155,7 @@ def test_game_ended():
         board, player, game = init_board_from_array(np_pieces, player)
         end_state = game.getGameEnded(board, player)
         assert expected_end_state == end_state, (
-                    "expected=%s, actual=%s, board=\n%s" % (expected_end_state, end_state, board))
+                "expected=%s, actual=%s, board=\n%s" % (expected_end_state, end_state, board))
 
 
 def test_immutable_move():

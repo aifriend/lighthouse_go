@@ -29,4 +29,3 @@ if __name__ == "__main__":
         print("Load trainExamples from file")
         c.loadTrainExamples()
     c.learn()
-

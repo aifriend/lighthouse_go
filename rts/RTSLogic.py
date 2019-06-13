@@ -2,7 +2,6 @@ import sys
 from typing import Any
 
 import numpy as np
-
 from rts.config.config import CONFIG
 from rts.config.configuration import NUM_ENCODERS, ACTS_REV, CARRY_IDX, TIME_IDX, P_NAME_IDX, HEALTH_IDX, MONEY_IDX, \
     A_TYPE_IDX, NUM_ACTS, d_acts, d_a_type

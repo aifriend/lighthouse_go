@@ -247,4 +247,3 @@ class Pegasus(Bot):
 
         self.log("MOVE TO LH: %s", str(move))
         return move
-

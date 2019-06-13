@@ -11,9 +11,8 @@ from typing import List
 
 import numpy as np
 import pygame
-from pygame.rect import Rect
-
 from lib.utils import dotdict
+from pygame.rect import Rect
 from rts.RTSLogic import RTSLogic
 from rts.config.config import CONFIG
 from rts.config.configuration import NUM_ACTS, P_NAME_IDX, A_TYPE_IDX, d_user_shortcuts, FPS, ACTS, d_a_type, ACTS_REV, \

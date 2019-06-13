@@ -7,7 +7,6 @@ from typing import Any, Tuple, Optional
 
 import numpy as np
 import pygame
-
 from rts.config.configuration import P_NAME_IDX, A_TYPE_IDX, d_a_color, d_type_rev, MONEY_IDX, TIME_IDX, CARRY_IDX, \
     HEALTH_IDX
 
@@ -97,13 +96,13 @@ def update_graphics(board: np.ndarray, arena, screen, clock, fps: int = 1) -> bo
     message_display(screen, u"" + 'Gold Player +1: ' + str(gold_p1), (int((n / 8) * canvas_scale),
                                                                       (n + 1) * canvas_scale + int(
                                                                           int(canvas_scale / 12) + canvas_scale * (
-                                                                                      0 / 4) + int(
+                                                                                  0 / 4) + int(
                                                                               canvas_scale * (1 / 8)))),
                     int(canvas_scale / 6))
     message_display(screen, u"" + 'Gold Player -1: ' + str(gold_p2), (int((n / 8) * canvas_scale),
                                                                       (n + 1) * canvas_scale + int(
                                                                           int(canvas_scale / 12) + canvas_scale * (
-                                                                                      1 / 4) + int(
+                                                                                  1 / 4) + int(
                                                                               canvas_scale * (1 / 8)))),
                     int(canvas_scale / 6))
 
@@ -112,7 +111,7 @@ def update_graphics(board: np.ndarray, arena, screen, clock, fps: int = 1) -> bo
     message_display(screen, u"" + 'Remaining ' + str(time_remaining), (int((n / 8) * canvas_scale),
                                                                        (n + 1) * canvas_scale + int(
                                                                            int(canvas_scale / 12) + canvas_scale * (
-                                                                                       2 / 4) + int(
+                                                                                   2 / 4) + int(
                                                                                canvas_scale * (1 / 8)))),
                     int(canvas_scale / 6))
 

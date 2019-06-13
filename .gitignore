@@ -125,3 +125,19 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+### JupyterNotebook ###
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Remove previous ipynb_checkpoints
+#   git rm -r .ipynb_checkpoints/
+#
+
+### JupyterNotebooks ###
+# gitignore template for Jupyter Notebooks
+# website: http://jupyter.org/
+
+
+# Remove previous ipynb_checkpoints
+#   git rm -r .ipynb_checkpoints/

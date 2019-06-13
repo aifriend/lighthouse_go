@@ -1,7 +1,6 @@
 from typing import Tuple
 
 import numpy as np
-
 from lib.Game import Game
 from rts.RTSLogic import RTSLogic
 from rts.config.config import CONFIG
@@ -207,4 +206,3 @@ class RTSGame(Game):
             return b.get_money_score(player)
         else:
             return b.get_combined_score(player)
-

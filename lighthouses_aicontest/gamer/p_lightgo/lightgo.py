@@ -49,50 +49,6 @@ class LightGo(Bot):
 
         return lh_map
 
-    def play(self, state):
-        """
-        Play as it was called by turn
-
-        :param: state
-        :return: action (pass, move, attack, connect)
-        """
-        lh_states = self._get_lh_states(state)
-        my_pos = tuple(state["position"])
-
-        if my_pos in lh_states:
-            # Connect
-            if lh_states[my_pos]["owner"] == self.player_num:
-                possible_connections = self._get_possible_connections(lh_states, my_pos)
-                if possible_connections:
-                    conn = self._decide_connection(
-                        possible_connections, my_pos, lh_states)
-                    return {
-                        "command": "connect",
-                        "destination": conn
-                    }
-
-            # Attack
-            if state["energy"] >= lh_states[my_pos]["energy"]:  # 100
-                energy = state["energy"]
-                self.log("ATTACK TO: %s", str(my_pos))
-                return {
-                    "command": "attack",
-                    "energy": energy
-                }
-
-        # Move
-        move = self._decide_movement(state, lh_states)
-        return {
-            "command": "move",
-            "x": move[0],
-            "y": move[1]
-        }
-
-        # Pass
-        return {
-            "command": "pass",
-        }
-
     def _get_lh_states(self, state):
         """
 
@@ -115,6 +71,52 @@ class LightGo(Bot):
                 dists_to_lhs[tuple(_lh_states[lh]["position"])]
 
         return _lh_states
+
+    def play(self, state):
+        """
+        Play as it was called by turn
+
+        :param: state
+        :return: action (pass, move, attack, connect)
+        """
+        lh_states = self._get_lh_states(state)
+        my_pos = tuple(state["position"])
+
+        if my_pos in lh_states:
+            # Connect
+            if lh_states[my_pos]["owner"] == self.player_num:
+                possible_connections = self._get_possible_connections(lh_states, my_pos)
+                if possible_connections:
+                    conn = self._decide_connection(
+                        possible_connections, state, lh_states)
+                    return {
+                        "command": "connect",
+                        "destination": conn
+                    }
+
+            # Attack
+            if 10 < state["energy"] >= lh_states[my_pos]["energy"]:  # 100
+                energy = state["energy"]
+                self.log("ATTACK TO: %s", str(my_pos))
+                return {
+                    "command": "attack",
+                    "energy": energy
+                }
+
+        # Move
+        move = self._decide_movement(state, lh_states)
+        return {
+            "command": "move",
+            "x": move[0],
+            "y": move[1]
+        }
+
+        # Pass
+        return {
+            "command": "pass",
+        }
+
+    ### CONNECTIONS ###
 
     def _get_possible_connections(self, lh_states, orig):
         """
@@ -139,23 +141,56 @@ class LightGo(Bot):
                 possible_connections.append(dest)
         return possible_connections
 
-    def _decide_connection(self, possible_connections, my_pos, lh_states):
+    def _decide_connection(self, possible_connections, state, lh_states):
         """
 
         :param possible_connections:
-        :param my_pos:
+        :param state:
         :param lh_states:
         :return:
         """
 
+        my_pos = tuple(state["position"])
         for conn in possible_connections:
             if Utils.closes_tri(lh_states, my_pos, conn):
                 self.log("CONNECT TRI: %s", str(conn))
                 return conn
 
-        conn = random.choice(possible_connections)
-        self.log("CONNECT RANDOM: %s", str(conn))
-        return conn
+        dest_lh = self._decide_dest_lh_connection(state, lh_states)
+        if dest_lh is not None:
+            self.log("CONNECT CEL: %s", str(dest_lh))
+            return dest_lh
+        else:
+            conn = random.choice(possible_connections)
+            self.log("CONNECT RANDOM: %s", str(conn))
+            return conn
+
+    def _decide_dest_lh_connection(self, state, lh_states):
+        """
+        Go to a interesting lighthouse
+
+        :param state:
+        :param lh_states:
+        :return:
+        """
+
+        tri = None
+        best_tri = 0
+        my_pos = tuple(state["position"])
+        possible_connections = self._get_possible_connections(lh_states, my_pos)
+        if len(possible_connections) > 1:
+            for dest_conn in possible_connections:
+                third_possible_connections = possible_connections.copy()
+                third_possible_connections.remove(dest_conn)
+                for third_conn in third_possible_connections:
+                    new_tri = len(Utils.closes_tri_by(my_pos, dest_conn, third_conn, True))
+                    if new_tri > best_tri:
+                        best_tri = new_tri
+                        tri = third_conn
+
+        return tri
+
+    ### MOVEMENTS ###
 
     def _get_possible_moves(self, pos):
         """
@@ -174,7 +209,7 @@ class LightGo(Bot):
         moves = [(x, y) for x, y in moves if self.map[cy + y][cx + x]]
         return moves
 
-    def _decide_dest_lh(self, state, lh_states):
+    def _decide_dest_lh_movement(self, state, lh_states):
         """
 
         :param state:
@@ -193,7 +228,7 @@ class LightGo(Bot):
                     lh_points += 500
             else:
                 possible_connections = self._get_possible_connections(lh_states, dest_lh)
-                lh_points += len(possible_connections) * 100
+                lh_points += len(possible_connections) * 200
                 if len(possible_connections) > 1:
                     for orig_conn in possible_connections:
                         for dest_conn in lh_states[orig_conn]["connections"]:
@@ -202,7 +237,7 @@ class LightGo(Bot):
                                 lh_points += 1000000 * tri_size
 
                 if lh_states[dest_lh]["energy"] < state["energy"]:
-                    lh_points += 100
+                    lh_points += 400
             lh_states[dest_lh]['points'] = lh_points
 
         dest_lh = max(lh_states.items(),
@@ -240,11 +275,10 @@ class LightGo(Bot):
             if energy_gain > 10:
                 self.log("MOVE TO HARVEST: %s", str(move))
                 return move
-        dest_lh = self._decide_dest_lh(state, lh_states)
+        dest_lh = self._decide_dest_lh_movement(state, lh_states)
         move = self._to_lh_movement(dest_lh,
                                     state["position"],
                                     possible_moves)
 
         self.log("MOVE TO LH: %s", str(move))
         return move
-

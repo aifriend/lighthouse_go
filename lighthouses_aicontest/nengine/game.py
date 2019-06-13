@@ -9,6 +9,7 @@ from lighthouses_aicontest.nengine.player import Player
 
 class Game(object):
     RDIST = 5
+    DECAY = 10
 
     def __init__(self, cfg, numplayers=None):
         if numplayers is None:
@@ -18,7 +19,7 @@ class Game(object):
         self.lighthouses = dict((x, Lighthouse(self, x)) for x in cfg.lighthouses)
         self.conns = set()
         self.tris = dict()
-        self.players = [Player(self, i, pos) for i, pos in enumerate(cfg.players[:numplayers])]
+        self.players = [Player(self, c, i, pos) for i, (c, pos) in enumerate(cfg.players[:numplayers])]
 
     def connect(self, player, dest_pos):
         if player.pos not in self.lighthouses:
@@ -80,7 +81,7 @@ class Game(object):
                 player.energy += energy
             self.island.energy[pos] = 0
         for lh in self.lighthouses.values():
-            lh.decay(10)
+            lh.decay(self.DECAY)
 
     def post_round(self):
         for lh in self.lighthouses.values():

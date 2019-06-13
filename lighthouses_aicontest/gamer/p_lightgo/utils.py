@@ -63,6 +63,43 @@ class Utils:
         return False
 
     @staticmethod
+    def _bias(p0, p1):
+        if (p0[1] == p1[1] and p0[0] > p1[0]) or p0[1] > p1[1]:
+            return 0
+        else:
+            return -1
+
+    @staticmethod
+    def _render(points):
+        v0, v1, v2 = points
+        if Utils._orient2d(v0, v1, v2) < 0:
+            v0, v1 = v1, v0
+        x0 = min(v0[0], v1[0], v2[0])
+        x1 = max(v0[0], v1[0], v2[0])
+        y0 = min(v0[1], v1[1], v2[1])
+        y1 = max(v0[1], v1[1], v2[1])
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                p = x, y
+                w0 = Utils._orient2d(v1, v2, p) + Utils._bias(v1, v2)
+                w1 = Utils._orient2d(v2, v0, p) + Utils._bias(v2, v0)
+                w2 = Utils._orient2d(v0, v1, p) + Utils._bias(v0, v1)
+                if w0 >= 0 and w1 >= 0 and w2 >= 0:
+                    yield p
+
+    @staticmethod
+    def closes_tri_by(orig, dest, third, island):
+        """
+
+        :param orig:
+        :param dest:
+        :param third:
+        :param island:
+        :return:
+        """
+        return [j for j in Utils._render((orig, dest, third))]
+
+    @staticmethod
     def closes_tri(lh_states, orig, dest, size=False):
         """
 

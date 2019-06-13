@@ -2,7 +2,6 @@ import os
 from typing import List, Tuple
 
 import numpy as np
-
 from lib.utils import dotdict
 from rts.config.encoders import OneHotEncoder, NumericEncoder
 

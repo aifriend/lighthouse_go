@@ -8,7 +8,6 @@ funny error message from tf :) - tensorflow.python.framework.errors_impl.NotFoun
 import os
 
 import numpy as np
-
 from lib.NeuralNet import NeuralNet
 from rts.config.config import CONFIG
 from rts.config.configuration import VERBOSE_MODEL_FIT

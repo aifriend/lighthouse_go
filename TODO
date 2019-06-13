@@ -40,3 +40,9 @@ Dependencies
 	pip install pipreqs
 	pipreqs .
 	pip install -r requirements.txt
+
+For Jupyter notebook
+    conda install ipykernel
+    jupyter kernelspec list
+    sudo jupyter kernelspec uninstall "jupyter-env-name"
+    python -m ipykernel install --user --name myenv --display-name "Python (myenv)"

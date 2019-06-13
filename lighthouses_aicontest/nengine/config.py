@@ -31,7 +31,7 @@ class GameConfig(object):
                     row.append(1)
                     players.append((c, (x, y)))
             self.island.append(row)
-        self.players = [pos for c, pos in sorted(players)]
+        self.players = [(c, pos) for c, pos in sorted(players)]
         w = len(self.island[0])
         h = len(self.island)
         if not all(len(l) == w for l in self.island):

@@ -17,7 +17,7 @@ from pygame.rect import Rect
 from lh.LHLogic import LHLogic
 from lh.config.config import CONFIG
 from lh.config.configuration import \
-    NUM_ACTS, P_NAME_IDX, A_TYPE_IDX, d_user_shortcuts, FPS, ACTS, d_a_type, ACTS_REV, d_user_shortcuts_rev
+    NUM_ACTS, P_NAME_IDX, d_user_shortcuts, FPS, ACTS, ACTS_REV, d_user_shortcuts_rev
 from lh.visualization.lh_pygame import update_graphics, init_visuals, message_display
 from lib.utils import dotdict
 

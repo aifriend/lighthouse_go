@@ -2,7 +2,6 @@ import sys
 from typing import Tuple
 
 import numpy as np
-
 from rts.src.config_class import CONFIG
 
 sys.path.append('..')

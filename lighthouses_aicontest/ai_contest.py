@@ -7,7 +7,7 @@ from lighthouses_aicontest.nengine.game import Game
 from lighthouses_aicontest.nengine.view import GameView
 
 cfg_file = "lighthouses_aicontest/maps/island.txt"
-bots = [0, 1, 2, 3]
+bots = [0, 1, 2]
 DEBUG = False
 
 config = GameConfig(cfg_file)
@@ -15,9 +15,8 @@ game = Game(config, len(bots))
 
 actors = [
     BotPlayer(game, 0, RandBot(), debug=DEBUG),
-    BotPlayer(game, 1, RandBot(), debug=DEBUG),
-    BotPlayer(game, 2, LightGo(), debug=DEBUG),
-    BotPlayer(game, 3, Pegasus(), debug=DEBUG)
+    BotPlayer(game, 1, LightGo(), debug=DEBUG),
+    BotPlayer(game, 2, Pegasus(), debug=DEBUG)
 ]
 for actor in actors:
     actor.initialize()

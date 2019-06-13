@@ -9,6 +9,7 @@ class Encoder:
 
     One-hot encoder uses binary representation of integer numbers, with exception of player name, which is processed separately
     """
+
     def __init__(self):
         self.NUM_ENCODERS = None
 
@@ -34,7 +35,6 @@ class OneHotEncoder(Encoder):
         """
         self.ISLAND_IDX_INC_OH = 2  # island to be played 2 bit - 00(not playable), 01(island playable) or 10(lh)
         self.P_NAME_IDX_INC_OH = 2  # playerName 2 bit - 00(neutral), 01(1) or 10(-1) or 11(both)
-        self.A_TYPE_IDX_INC_OH = 2  # actor type -> 2 bit,
         self.ENERGY_W1_IDX_INC_OH = 12  # work1 energy
         self.ENERGY_W2_IDX_INC_OH = 12  # work2 energy
         self.LH_ENERGY_IDX_INC_OH = 12  # lighthouse energy
@@ -51,10 +51,7 @@ class OneHotEncoder(Encoder):
         self.P_NAME_IDX_OH = self.ISLAND_IDX_MAX_OH
         self.P_NAME_IDX_MAX_OH = self.P_NAME_IDX_OH + self.P_NAME_IDX_INC_OH
 
-        self.A_TYPE_IDX_OH = self.P_NAME_IDX_MAX_OH
-        self.A_TYPE_IDX_MAX_OH = self.A_TYPE_IDX_OH + self.A_TYPE_IDX_INC_OH
-
-        self.ENERGY_W1_IDX_OH = self.A_TYPE_IDX_MAX_OH
+        self.ENERGY_W1_IDX_OH = self.P_NAME_IDX_MAX_OH
         self.ENERGY_W1_IDX_MAX_OH = self.ENERGY_W1_IDX_OH + self.ENERGY_W1_IDX_INC_OH
 
         self.ENERGY_W2_IDX_OH = self.ENERGY_W1_IDX_MAX_OH
@@ -109,6 +106,7 @@ class OneHotEncoder(Encoder):
     def encode_multiple(self, boards: np.ndarray) -> np.ndarray:
         """
         Encodes and returns multiple boards using onehot encoder
+
         :param boards: array of boards to encode
         :return: new boards, encoded using onehot encoder
         """
@@ -120,10 +118,31 @@ class OneHotEncoder(Encoder):
     def encode(self, board) -> np.ndarray:
         """
         Encode single board using onehot encoder
+
         :param board: normal board
         :return: new encoded board
         """
-        from lh.config.configuration import ISLAND_IDX, P_NAME_IDX, A_TYPE_IDX, ENERGY_W1_IDX, ENERGY_W2_IDX, \
+        """
+        lighthouses = []
+        for lh in self.board.lighthouses.values():
+            connections = [next(l for l in c if l is not lh.pos)
+                           for c in self.board.conns if lh.pos in c]
+            lighthouses.append({
+                "position": lh.pos,
+                "owner": lh.owner,
+                "energy": lh.energy,
+                "connections": connections,
+                "have_key": lh.pos in player.keys,
+            })
+        state = {
+            "position": player.pos,
+            "score": player.score,
+            "energy": player.energy,
+            "view": self.board.island.get_view(player.pos),
+            "lighthouses": lighthouses,
+        }
+        """
+        from lh.config.configuration import ISLAND_IDX, P_NAME_IDX, ENERGY_W1_IDX, ENERGY_W2_IDX, \
             LH_ENERGY_IDX, LH_OWNER_IDX, LH_KEY_IDX, LH_CONN_IDX, LH_TRI_IDX, TIME_IDX
 
         n = board.shape[0]
@@ -138,12 +157,19 @@ class OneHotEncoder(Encoder):
                 elif board[x, y, P_NAME_IDX] == -1:
                     player = 2
 
+                # switch lighthouse key from -1 to 2 or 3
+                lh_key = 0
+                if board[x, y, LH_KEY_IDX] == 1:
+                    lh_key = 1
+                elif board[x, y, LH_KEY_IDX] == -1:
+                    lh_key = 2
+                elif board[x, y, LH_KEY_IDX] == 3:
+                    lh_key = 3
+
                 b[x, y][self.ISLAND_IDX_OH:self.ISLAND_IDX_MAX_OH] = \
                     self.itb(board[x, y, ISLAND_IDX], self.ISLAND_IDX_INC_OH)
                 b[x, y][self.P_NAME_IDX_OH:self.P_NAME_IDX_MAX_OH] = \
                     self.itb(player, self.P_NAME_IDX_INC_OH)
-                b[x, y][self.A_TYPE_IDX_OH:self.A_TYPE_IDX_MAX_OH] = \
-                    self.itb(board[x, y, A_TYPE_IDX], self.A_TYPE_IDX_INC_OH)
                 b[x, y][self.ENERGY_W1_IDX_OH:self.ENERGY_W1_IDX_MAX_OH] = \
                     self.itb(board[x, y, ENERGY_W1_IDX], self.ENERGY_W1_IDX_INC_OH)
                 b[x, y][self.ENERGY_W2_IDX_OH:self.ENERGY_W2_IDX_MAX_OH] = \
@@ -153,7 +179,7 @@ class OneHotEncoder(Encoder):
                 b[x, y][self.LH_OWNER_IDX_OH:self.LH_OWNER_IDX_MAX_OH] = \
                     self.itb(board[x, y, LH_OWNER_IDX], self.LH_OWNER_IDX_INC_OH)
                 b[x, y][self.LH_KEY_IDX_OH:self.LH_KEY_IDX_MAX_OH] = \
-                    self.itb(board[x, y, LH_KEY_IDX], self.LH_KEY_IDX_INC_OH)
+                    self.itb(lh_key, self.LH_KEY_IDX_INC_OH)
                 b[x, y][self.LH_CONN_IDX_OH:self.LH_CONN_IDX_MAX_OH] = \
                     self.itb(board[x, y, LH_CONN_IDX], self.LH_CONN_IDX_INC_OH)
                 b[x, y][self.LH_TRI_IDX_OH:self.LH_TRI_IDX_MAX_OH] = \
