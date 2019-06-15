@@ -98,19 +98,19 @@ class OneHotEncoder(Encoder):
         """
         num = int(num)
         if length == 1:
-            return [int(i) for i in '{0:01b}'.format(num)]
+            return [int(i) for i in list('{0:01b}'.format(num))]
         if length == 2:
-            return [int(i) for i in '{0:02b}'.format(num)]
+            return [int(i) for i in list('{0:02b}'.format(num))]
         if length == 3:
-            return [int(i) for i in '{0:03b}'.format(num)]
+            return [int(i) for i in list('{0:03b}'.format(num))]
         if length == 4:
-            return [int(i) for i in '{0:04b}'.format(num)]
+            return [int(i) for i in list('{0:04b}'.format(num))]
         if length == 5:
-            return [int(i) for i in '{0:05b}'.format(num)]
+            return [int(i) for i in list('{0:05b}'.format(num))]
         if length == 8:
-            return [int(i) for i in '{0:08b}'.format(num)]
+            return [int(i) for i in list('{0:08b}'.format(num))]
         if length == 11:
-            return [int(i) for i in '{0:011b}'.format(num)]
+            return [int(i) for i in list('{0:011b}'.format(num))]
         raise TypeError("Length not supported:", length)
 
     def encode_multiple(self, boards: np.ndarray) -> np.ndarray:
