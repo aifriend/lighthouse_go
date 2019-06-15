@@ -1,4 +1,4 @@
-from lh.config.configuration import P_NAME_IDX, d_a_type, A_TYPE, PL_ENERGY_W2_IDX, PL_ENERGY_W1_IDX, \
+from lh.config.configuration import P_NAME_IDX, d_a_type, A_TYPE_IDX, PL_ENERGY_W2_IDX, PL_ENERGY_W1_IDX, \
     PL_SCORE_W1_IDX, PL_SCORE_W2_IDX, LH_KEY_IDX, ISLAND_IDX
 from lh.config.gameconfig import MoveError
 
@@ -22,7 +22,6 @@ class Player(object):
         if turn is not None:
             self.turn = turn
         pieces[self._pos[1], self._pos[0], P_NAME_IDX] = self.turn
-        pieces[self._pos[1], self._pos[0], A_TYPE] = d_a_type['Work']
 
     def score_to_board(self, pieces, pose, score=-1):
         if score >= 0:
@@ -42,7 +41,7 @@ class Player(object):
 
     def keys_to_board(self, pieces):
         for key in self._keys:
-            actor_type = pieces[key[1], key[0], A_TYPE]
+            actor_type = pieces[key[1], key[0], A_TYPE_IDX]
             if actor_type == d_a_type["Lighthouse"]:
                 lh_key_owner = pieces[key[1], key[0], LH_KEY_IDX]
                 if lh_key_owner == 0:
@@ -61,7 +60,7 @@ class Player(object):
             for y in range(dim_y):
                 p_pose = (y, x)
                 p_turn = pieces[x][y][P_NAME_IDX]
-                if pieces[x][y][A_TYPE] == d_a_type["Work"]:
+                if pieces[x][y][P_NAME_IDX] != 0:
                     player = Player(p_pose, p_turn)
                     player.board_to_energy(pieces)
                     player.board_to_score(pieces)
@@ -86,7 +85,7 @@ class Player(object):
             self._energy = pieces[self._pos[1], self._pos[0], PL_ENERGY_W2_IDX]
 
     def board_to_keys(self, pieces):
-        lighthouse_list = [lh for lh in pieces[:, :, A_TYPE] if lh == d_a_type["Lighthouse"]]
+        lighthouse_list = [lh for lh in pieces[:, :, A_TYPE_IDX] if lh == d_a_type["Lighthouse"]]
         for lh in lighthouse_list:
             lh_key_owner = pieces[lh[1], lh[0], LH_KEY_IDX]
             if lh_key_owner == self.turn:

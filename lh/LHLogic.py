@@ -3,12 +3,72 @@ import math
 import numpy as np
 
 from lh.config.config import CONFIG
-from lh.config.configuration import ISLAND_IDX, ACTS_REV, NUM_ACTS, LH_CONN_IDX, ENERGY_IDX
+from lh.config.configuration import ISLAND_IDX, ACTS_REV, NUM_ACTS, LH_CONN_IDX, LH_TRI_IDX, ENERGY_IDX
 from lh.config.gameconfig import MoveError, GameConfig
 from lh.logic.board.island import Island
 from lh.logic.board.lighthouse import Lighthouse
 from lh.logic.board.player import Player
 from lh.logic.utils.geom import colinear, intersect, render, distt
+
+
+class Connection:
+    def __init__(self):
+        self._conns = set()
+
+    @property
+    def conns(self):
+        return self._conns
+
+    def conns_to_board(self, pieces, conns=None):
+        if conns is not None:
+            self._conns = conns
+        pieces[0, 0, LH_CONN_IDX] = self._conns
+
+    def board_to_conns(self, pieces):
+        self._conns = pieces[0, 0, LH_CONN_IDX]
+
+    @staticmethod
+    def encode_conns(pieces) -> None:
+        connection = 0
+        player_lh = Lighthouse.owned_by(pieces, player=1)
+        conns = pieces[0][0][LH_CONN_IDX]
+        for pair in conns:
+            if next(iter(pair)) in player_lh:
+                connection += 1
+        pieces[0][0][LH_CONN_IDX] = connection
+
+    def close_conn(self, pos):
+        self._conns = set(i for i in self._conns if pos not in i)
+
+
+class Triangle:
+    def __init__(self):
+        self._tris = dict()
+
+    @property
+    def tris(self):
+        return self._tris
+
+    def tris_to_board(self, pieces, tris=None):
+        if tris is not None:
+            self._tris = tris
+        pieces[0, 0, LH_TRI_IDX] = self._tris
+
+    def board_to_tris(self, pieces):
+        self._tris = pieces[0, 0, LH_TRI_IDX]
+
+    @staticmethod
+    def encode_tris(pieces) -> None:
+        cell = 0
+        player_lh = Lighthouse.owned_by(pieces, player=1)
+        polygons = pieces[0][0][LH_TRI_IDX]
+        for key, tris in polygons.items():
+            if next(iter(key)) in player_lh:
+                cell += len(tris)
+        pieces[0, 0, LH_TRI_IDX] = cell
+
+    def close_tri(self, pos):
+        self._tris = dict(i for i in self._tris.items() if pos not in i[0])
 
 
 class Board(object):
@@ -41,8 +101,8 @@ class Board(object):
         self._lighthouses = dict((pos, Lighthouse(self, pos)) for pos in enumerate(cfg.lighthouses))
 
         # connections
-        self._connection = self.Connection()
-        self._triangle = self.Triangle()
+        self._connection = Connection()
+        self._triangle = Triangle()
 
     def from_array(self, board):
         # island
@@ -75,6 +135,7 @@ class Board(object):
 
         # lighthouses
         for lighthouse in self._lighthouses.values():
+            lighthouse.lh_to_board(pieces)
             lighthouse.energy_to_board(pieces)
             lighthouse.owner_to_board(pieces)
 
@@ -83,50 +144,6 @@ class Board(object):
         self._triangle.tris_to_board(pieces)
 
         return pieces
-
-    class Connection:
-        def __init__(self):
-            self._conns = set()
-
-        @property
-        def conns(self):
-            return self._conns
-
-        def conns_to_board(self, pieces, conns=None):
-            if conns is not None:
-                self._conns = conns
-            pieces[0, 0, LH_CONN_IDX] = self._conns
-
-        def board_to_conns(self, pieces):
-            self._conns = pieces[0, 0, LH_CONN_IDX]
-
-        def encode_conns(self, lighthouses):
-            pass
-
-        def close_conn(self, pos):
-            self._conns = set(i for i in self._conns if pos not in i)
-
-    class Triangle:
-        def __init__(self):
-            self._tris = dict()
-
-        @property
-        def tris(self):
-            return self._tris
-
-        def tris_to_board(self, pieces, tris=None):
-            if tris is not None:
-                self._tris = tris
-            pieces[0, 0, LH_CONN_IDX] = self._tris
-
-        def board_to_tris(self, pieces):
-            self._tris = pieces[0, 0, LH_CONN_IDX]
-
-        def encode_tris(self):
-            pass
-
-        def close_tri(self, pos):
-            self._tris = dict(i for i in self._tris.items() if pos not in i[0])
 
     def close_conn(self, pos):
         self._connection.close_conn(pos)
@@ -236,8 +253,6 @@ class Board(object):
 
         valid_actions.append(directions)
 
-        return valid_moves, valid_actions
-
     def get_available_attack(self, player, valid_moves, valid_actions):
         # All possible attacks
         possible_attack = {9: 0.1,  # attack 10%
@@ -266,8 +281,6 @@ class Board(object):
                 valid_moves[13] = 1
 
         valid_actions.append(attacks)
-
-        return valid_moves, valid_actions
 
     def get_available_lh_connections(self, player, valid_moves, valid_actions):
         # All possible connections
@@ -302,8 +315,6 @@ class Board(object):
                                 break
 
         valid_actions.append(connections)
-
-        return valid_moves, valid_actions
 
     @staticmethod
     def get_score(player) -> int:
@@ -399,7 +410,7 @@ class LHLogic:
                 raise MoveError("Attack command requires integer energy")
             if player.pos not in self.board.lighthouses:
                 raise MoveError("Player must be located at target lighthouse")
-            self.board.lighthouses[player.pos].attack(self.pieces, player, act_value)
+            self.board.lighthouses[player.pos].attack(player, act_value)
 
         # Game connection
         elif act == "connect":
@@ -444,13 +455,13 @@ class LHLogic:
         actions = list()
 
         # AVAILABLE ACTION - WK - MOVE
-        moves, actions = self.board.get_available_worker_moves(player, moves, actions)
+        self.board.get_available_worker_moves(player, moves, actions)
 
         # AVAILABLE ACTION - WK - ATTACK
-        moves, actions = self.board.get_available_attack(player, moves, actions)
+        self.board.get_available_attack(player, moves, actions)
 
         # AVAILABLE ACTION - LH - CONN
-        moves, actions = self.board.get_available_lh_connections(player, moves, actions)
+        self.board.get_available_lh_connections(player, moves, actions)
 
         self.ACTIONS = actions
 

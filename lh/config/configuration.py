@@ -36,26 +36,22 @@ FPS = 1000
 # ##################################
 
 # Defining number of encoders
-NUM_ENCODERS = 12
+NUM_ENCODERS = 14
 
 # Setting indexes to each encoder
 ISLAND_IDX = 0
-ENERGY_IDX = 0
-
-P_NAME_IDX = 1
-A_TYPE = 2
-
-PL_SCORE_W1_IDX = 3
-PL_SCORE_W2_IDX = 4
-PL_ENERGY_W1_IDX = 5
-PL_ENERGY_W2_IDX = 6
-
+ENERGY_IDX = 1
+P_NAME_IDX = 2
+A_TYPE_IDX = 3
+PL_SCORE_W1_IDX = 4
+PL_SCORE_W2_IDX = 5
+PL_ENERGY_W1_IDX = 6
+PL_ENERGY_W2_IDX = 7
 LH_ENERGY_IDX = 8
 LH_OWNER_IDX = 9
 LH_KEY_IDX = 10
 LH_CONN_IDX = 11
 LH_TRI_IDX = 12
-
 TIME_IDX = 13
 
 # ##################################
@@ -156,24 +152,20 @@ d_user_shortcuts = dotdict({
     's': 2,  # down
     'd': 3,  # right
     'a': 4,  # left
-    'q': 5,  # mine_resources
-    'e': 6,  # return_resources
-    '1': 7,  # attack_up
-    '2': 8,  # attack_down
-    '3': 9,  # attack_right
-    '4': 10,  # attack_left
-    '6': 11,  # npc_up
-    '7': 12,  # npc_down
-    '8': 13,  # npc_right
-    '9': 14,  # npc_left
-    'f': 19,  # barracks_up
-    'g': 20,  # barracks_down
-    'h': 21,  # barracks_right
-    'j': 22,  # barracks_left
-    'b': 27,  # heal_up
-    'n': 28,  # heal_down
-    'm': 29,  # heal_right
-    ',': 30,  # heal_left
+    'q': 5,  # upright
+    'e': 6,  # upleft
+    '1': 7,  # downright
+    '2': 8,  # downleft
+    '3': 9,  # attack10
+    '4': 10,  # attack30
+    '6': 11,  # attack60
+    '7': 12,  # attack80
+    '8': 13,  # attack100
+    '9': 14,  # connect0
+    'f': 19,  # connect1
+    'g': 20,  # connect2
+    'h': 21,  # connect3
+    'j': 22,  # connect4
 })
 
 # Reverse dictionary for user shortcuts
@@ -184,36 +176,26 @@ d_user_shortcuts_rev = dotdict({
     2: 's',  # down
     3: 'd',  # right
     4: 'a',  # left
-
-    5: 'q',  # mine_resources
-    6: 'e',  # return_resources
-
-    7: '1',  # attack_up
-    8: '2',  # attack_down
-    9: '3',  # attack_right
-    10: '4',  # attack_left
-
-    11: '6',  # npc_up
-    12: '7',  # npc_down
-    13: '8',  # npc_right
-    14: '9',  # npc_left
-
-    19: 'f',  # barracks_up
-    20: 'g',  # barracks_down
-    21: 'h',  # barracks_right
-    22: 'j',  # barracks_left
-
-    27: 'b',  # heal_up
-    28: 'n',  # heal_down
-    29: 'm',  # heal_right
-    30: ',',  # heal_left
+    5: 'q',  # upright
+    6: 'e',  # upleft
+    7: '1',  # downright
+    8: '2',  # downleft
+    9: '3',  # attack10
+    10: '4',  # attack30
+    11: '6',  # attack60
+    12: '7',  # attack80
+    13: '8',  # attack100
+    14: '9',  # connect0
+    19: 'f',  # connect1
+    20: 'g',  # connect2
+    21: 'h',  # connect3
+    22: 'j',  # connect4
 })
 
 # Colors of actors displayed in Pygame
 d_a_color = dotdict({
-    1: (230, 0, 50),  # Gold : red
+    1: (230, 0, 50),  # Lighthouse : red
     2: (0, 165, 208),  # Work : blue
-    3: (255, 156, 255),  # Barr : pink
 })
 
 
@@ -241,45 +223,18 @@ class Configuration:
 
     class _GameConfig:
         def __init__(self,
-                     money_increment,
-                     initial_gold,
-                     maximum_gold,
-                     sacrificial_heal,
-                     heal_amount,
-                     heal_cost,
+                     initial_energy,
                      damage,
-                     destroy_all,
-                     a_max_health,
-                     a_cost,
                      acts_enabled,
                      timeout):
             self.encoder = OneHotEncoder()
 
             # ##################################
-            # ############# GOLD ###############
+            # ############# ENERGY #############
             # ##################################
 
-            # how much money is returned when returned resources
-            self.MONEY_INC = money_increment
-
-            # how much initial gold do players get at game begining
-            self.INITIAL_GOLD = initial_gold
-
-            # Maximum gold that players can have - It is limited to 8 bits for one-hot onehot_encoder
-            self.MAX_GOLD = maximum_gold
-
-            # ##################################
-            # ############# HEAL ###############
-            # ##################################
-
-            # Game mechanic where actors can damage themselves to heal friendly unit. This is only used when player doesn't have any money to pay for heal action
-            self.SACRIFICIAL_HEAL = sacrificial_heal
-
-            # How much friendly unit is healed when executing heal action
-            self.HEAL_AMOUNT = heal_amount
-            # how much money should player pay when heal action is getting executed.
-
-            self.HEAL_COST = heal_cost
+            # how much initial energy do players get at game begining
+            self.INITIAL_ENERGY = initial_energy
 
             # ##################################
             # ########### TIMEOUT ##############
@@ -297,24 +252,6 @@ class Configuration:
             # how much damage is dealt to attacked actor
             self.DAMAGE = damage
 
-            # when attacking, all enemy units are destroyed, resulting in victory for the attacking player
-            if destroy_all:
-                self.DAMAGE = 10000
-
-            # Maximum health that actor can have - this is also initial health that actor has.
-            self.a_max_health = dotdict(a_max_health or {
-                1: 10,  # Gold
-                2: 10,  # Work
-                3: 20,  # Barr
-            })
-
-            # Cost of actor to produce (key - actor type, value - number of gold coins to pay)
-            self.a_cost = dotdict(a_cost or {
-                1: 0,  # Gold
-                2: 1,  # Work
-                3: 4,  # Barr
-            })
-
             self.acts_enabled = dotdict(acts_enabled or {
                 "pass": True,
                 "up": True,
@@ -325,8 +262,16 @@ class Configuration:
                 "upleft": True,
                 "downright": True,
                 "downleft": True,
-                "attack": True,
-                "connect": True
+                "attack10": True,
+                "attack30": True,
+                "attack60": True,
+                "attack80": True,
+                "attack100": True,
+                "connect0": True,
+                "connect1": True,
+                "connect2": True,
+                "connect3": True,
+                "connect4": True
             })
 
     class _PitArgs:
@@ -426,29 +371,13 @@ class Configuration:
                  pit_visibility=4,
                  timeout_player=200,
 
-                 money_increment_player1: int = 3,
-                 initial_gold_player1: int = 1,
-                 maximum_gold_player1: int = 255,
-                 sacrificial_heal_player1: bool = False,
-                 heal_amount_player1: int = 5,
-                 heal_cost_player1: int = 1,
+                 initial_energy_player1: int = 0,
                  damage_player1: int = 20,
-                 destroy_all_player1: bool = False,
-                 a_max_health_player1: dict = None,
-                 a_cost_player1: dict = None,
                  acts_enabled_player1: dict = None,
                  player1_model_file: str = "best_player1.pth.tar",
 
-                 money_increment_player2: int = 3,
-                 initial_gold_player2: int = 1,
-                 maximum_gold_player2: int = 255,
-                 sacrificial_heal_player2: bool = False,
-                 heal_amount_player2: int = 5,
-                 heal_cost_player2: int = 1,
+                 initial_energy_player2: int = 0,
                  damage_player2: int = 20,
-                 destroy_all_player2: bool = False,
-                 a_max_health_player2: dict = None,
-                 a_cost_player2: dict = None,
                  acts_enabled_player2: dict = None,
                  player2_model_file: str = "best_player2.pth.tar",
 
@@ -484,92 +413,14 @@ class Configuration:
         :param learn_visibility: How much console should output while running learn. If visibility.verbose > 3, Pygame is shown
         :param pit_visibility: How much console should output while running pit. If visibility.verbose > 3, Pygame is shown
         :param timeout_player: After what time game will timeout if 'useTimeout' is set to true
-
-        :param money_increment_player1: How much money player should gain when worker returns gold coins
-        :param initial_gold_player1: How much initial gold should player have
-        :param maximum_gold_player1: Maximum gold for player (max allowed value is 255)
-        :param sacrificial_heal_player1: If actors can sacrifice their health to heal other actors if player doesn't have enough gold
-        :param heal_amount_player1: how much should action 'heal' heal other actor
-        :param heal_cost_player1: how much should action 'heal' cost gold coins. If sacrificial_heal is enabled, this is the amount that actors health will be reduced if player doesn't have enough gold
+        :param initial_energy_player1: How much initial energy should player have
         :param damage_player1: How much damage is inflicted upon action 'attack' on other actor
-        :param destroy_all_player1: If by executing action 'attack', all opponents actors are destroyed
-        :param a_max_health_player1: dictionary of maximum amount of healths for each actor. See its default values to override
-            ``
-            Example: {
-                1: 10,  # Gold
-                2: 10,  # Work
-                3: 20,  # Barr
-            }
-            ``
-        :param a_cost_player1: dictionary of costs for each actor. See its default values to override
-            ``
-            Example: {
-                1: 0,  # Gold
-                2: 1,  # Work
-                3: 4,  # Barr
-            }
-            ``
         :param acts_enabled_player1: dictionary of which actions are enabled for player. See its default values to override.
-            ``
-            Example: {
-                "idle": False,
-                "up": True,
-                "down": True,
-                "right": True,
-                "left": True,
-                "mine_resources": True,
-                "return_resources": True,
-                "attack": True,
-                "npc": True,
-                "barracks": True,
-                "heal": True
-            }
-            ``
         :param player1_model_file: Filename in temp folder that player 1 nnet player uses
-
-        :param money_increment_player2: How much money player should gain when worker returns gold coins
-        :param initial_gold_player2: How much initial gold should player have
-        :param maximum_gold_player2: Maximum gold for player (max allowed value is 255)
-        :param sacrificial_heal_player2: If actors can sacrifice their health to heal other actors if player doesn't have enough gold
-        :param heal_amount_player2: how much should action 'heal' heal other actor
-        :param heal_cost_player2: how much should action 'heal' cost gold coins. If sacrificial_heal is enabled, this is the amount that actors health will be reduced if player doesn't have enough gold
+        :param initial_energy_player2: How much initial energy should player have
         :param damage_player2: How much damage is inflicted upon action 'attack' on other actor
-        :param destroy_all_player2: If by executing action 'attack', all opponents actors are destroyed
-        :param a_max_health_player2: dictionary of maximum amout of healths for each actor. See its default values to override
-            ``
-            Example: {
-                1: 10,  # Gold
-                2: 10,  # Work
-                3: 20,  # Barr
-            }
-            ``
-        :param a_cost_player2: dictionary of costs for each actor. See its default values to override
-            ``
-            Example: {
-                1: 0,  # Gold
-                2: 1,  # Work
-                3: 4,  # Barr
-            }
-            ``
         :param acts_enabled_player2: dictionary of which actions are enabled for player. See its default values to override
-            ``
-            Example: {
-                "idle": False,
-                "up": True,
-                "down": True,
-                "right": True,
-                "left": True,
-                "mine_resources": True,
-                "return_resources": True,
-                "attack": True,
-                "npc": True,
-                "barracks": True,
-                "heal": True
-            }
-            ``
         :param player2_model_file: Filename in temp folder that player 2 nnet player uses
-
-
         :param num_iters: How many iterations of games it should be played
         :param num_eps: How many episodes in each game iteration it should be played
         :param temp_threshold: Used by coach. "It uses a temp=1 if episodeStep < tempThreshold, and thereafter uses temp=0."
@@ -584,13 +435,11 @@ class Configuration:
         :param num_iters_for_train_examples_history: How many iterations of train examples should be kept for learning. If this number is exceeded, oldest iteration of train exaples is removed from queue
         :param save_train_examples: If train examples should be saved to file (Caution if choosing this, because of memory error)
         :param load_train_examples: If train examples should be loaded from file (Caution if choosing this, because of memory error)
-
         :param player1_type: What type should player 1 be ("nnet", "random", "greedy", "human")
         :param player2_type: What type should player 2 be ("nnet", "random", "greedy", "human")
         :param player1_config: If "nnet" player is chosen, config can be provided {'numMCTSSims': 2, 'cpuct': 1.0}
         :param player2_config: If "nnet" player is chosen, config can be provided {'numMCTSSims': 2, 'cpuct': 1.0}
         :param num_games: How many games should be played for pit config
-
         :param lr: Learning rate of model
         :param dropout: Dropout in NNet Model config
         :param epochs: How many epochs should learning take
@@ -600,7 +449,8 @@ class Configuration:
 
         """
 
-        # output for game stats during playing games (game_episode, game iteration, player name, action executed, action_name, action_direction, player_score...
+        # output for game stats during playing games (game_episode, game iteration, player name, action executed,
+        # action_name, action_direction, player_score...
         self.config_file_pit = "temp/config_pit.csv"
         self.config_file_learn = "temp/config_learn.csv"
 
@@ -612,29 +462,13 @@ class Configuration:
         self.timeout = timeout_player
 
         self.player1_config = self._GameConfig(
-            money_increment=money_increment_player1,
-            initial_gold=initial_gold_player1,
-            maximum_gold=maximum_gold_player1,
-            sacrificial_heal=sacrificial_heal_player1,
-            heal_amount=heal_amount_player1,
-            heal_cost=heal_cost_player1,
+            initial_energy=initial_energy_player1,
             damage=damage_player1,
-            destroy_all=destroy_all_player1,
-            a_max_health=a_max_health_player1,
-            a_cost=a_cost_player1,
             acts_enabled=acts_enabled_player1)
 
         self.player2_config = self._GameConfig(
-            money_increment=money_increment_player2,
-            initial_gold=initial_gold_player2,
-            maximum_gold=maximum_gold_player2,
-            sacrificial_heal=sacrificial_heal_player2,
-            heal_amount=heal_amount_player2,
-            heal_cost=heal_cost_player2,
+            initial_energy=initial_energy_player2,
             damage=damage_player2,
-            destroy_all=destroy_all_player2,
-            a_max_health=a_max_health_player2,
-            a_cost=a_cost_player2,
             acts_enabled=acts_enabled_player2)
 
         self.learn_args = self._LearnArgs(
