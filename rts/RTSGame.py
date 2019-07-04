@@ -187,7 +187,7 @@ class RTSGame(Game):
         """
         Uses one of 3 elo functions that determine better player
 
-        :param board: game state
+        :param board: game statenewB
         :param player: current player
         :return: elo for current player on this board
         """

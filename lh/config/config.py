@@ -1,21 +1,20 @@
-# noinspection PyUnresolvedReferences
-from lh.config.configuration import Configuration
+from lh.config.LHConfig import LHConfig
 
 # ############################### Basic config #####################################
 # CONFIG = Configuration()
 
 # ###########################   Example learning   #################################
-CONFIG = Configuration(num_iters=10,  # iteration of episodes
-                       num_eps=10,  # episode of self-playing game
-                       num_mcts_sims=30,  # mcts open nodes
-                       epochs=100)  # complete whole dataset (in batches) for nnet to learn
-# Description
-"""
-Example of longer learning with high number of eps and mcts sims.
-"""
+CONFIG = LHConfig(num_iters=100,  # iteration of episodes
+                  num_iters_for_train_examples_history=30,
+                  num_eps=6,  # episode of self-playing game
+                  num_mcts_sims=5,  # mcts open nodes
+                  epochs=10,  # complete whole dataset (in batches) for nnet to learn
+                  arena_compare=8,  # even
+                  timeout_player=200,
+                  load_train_examples=False,
+                  load_model=False)
 
 # ################################### Run 1 #########################################
-
 """
 CONFIG = Configuration(num_iters=100,
                        num_iters_for_train_examples_history=30,
@@ -29,7 +28,7 @@ CONFIG = Configuration(num_iters=100,
 # Description
 """
 * Num iterations: Increased to 100, so graphing can be done correctly and multiple comparisons between models are done.
-Train examples history: Increased to 30, because of high number of iterations. After 30 iterations, learning process 
+* Train examples history: Increased to 30, because of high number of iterations. After 30 iterations, learning process 
 becomes quite slow but efficient
 * Num eps: Decreased to 4, so multiple iterations can be triggered faster
 * Num mcts sims: Decreased to 5, because game is not played to end, it doesnt really contribute that much
@@ -55,18 +54,13 @@ CONFIG = Configuration(num_iters=100,
                        num_mcts_sims=5,
                        arena_compare=7,
                        epochs=100,
-                       initial_gold_player1=10,
-                       initial_gold_player2=10,
-                       initial_board_config=[
-                           Configuration.BoardTile(1, 0, 4, 'Gold'),
-                           Configuration.BoardTile(-1, 7, 4, 'Gold'),
-                       )
+                       player1_type='random',
+                       player2_type='random')
 """
 # Description
 """
-Initial board config: players have gold actors on edges of map
+Initial board config
 """
-
 # Results
 """
 Players start game by constructing as much actors as they can with provided gold.

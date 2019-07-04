@@ -1,7 +1,7 @@
 import time
 
 from lib.progress.average import AverageMeter
-from lib.progress.bar import Bar
+from lib.progress.bar import ShadyBar
 
 
 class Arena:
@@ -45,6 +45,7 @@ class Arena:
                 assert self.view
                 print("Turn ", str(it), "Player ", str(cur_player))
                 self.view.display(board)
+
             action = players[cur_player + 1](self.game.getCanonicalForm(board, cur_player))
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, cur_player), 1)
             if valids[action] == 0:
@@ -70,12 +71,12 @@ class Arena:
             draws:  games won by nobody
         """
         eps_time = AverageMeter()
-        bar = Bar('Arena.playGames', max=num)
+        bar = ShadyBar('Arena.playGames', max=num)
         end = time.time()
         eps = 0
         maxeps = int(num)
 
-        num = int(num / 2)
+        num = int(round(num / 2))
         oneWon = 0
         twoWon = 0
         draws = 0
@@ -91,11 +92,8 @@ class Arena:
             eps += 1
             eps_time.update(time.time() - end)
             end = time.time()
-            bar.suffix = '({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}'.format(eps=eps + 1,
-                                                                                                       maxeps=maxeps,
-                                                                                                       et=eps_time.avg,
-                                                                                                       total=bar.elapsed_td,
-                                                                                                       eta=bar.eta_td)
+            bar.suffix = '(P1/P2 {eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}' \
+                .format(eps=eps + 1, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td)
             bar.next()
 
         self.player1, self.player2 = self.player2, self.player1
@@ -109,15 +107,12 @@ class Arena:
             else:
                 draws += 1
             # bookkeeping + plot progress
-            eps += 1
             eps_time.update(time.time() - end)
             end = time.time()
-            bar.suffix = '({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}'.format(eps=eps + 1,
-                                                                                                       maxeps=num,
-                                                                                                       et=eps_time.avg,
-                                                                                                       total=bar.elapsed_td,
-                                                                                                       eta=bar.eta_td)
+            bar.suffix = 'P2/P1 ({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}' \
+                .format(eps=eps + 1, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td)
             bar.next()
+            eps += 1
 
         bar.finish()
 

@@ -1,8 +1,6 @@
 """
 NNet wrapper uses defined nnet model to train and predict
 
-funny error message from tf :) - tensorflow.python.framework.errors_impl.NotFoundError: No algorithm worked!
-
 """
 
 import os

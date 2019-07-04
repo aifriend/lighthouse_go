@@ -10,7 +10,7 @@ import numpy as np
 from lib.Arena import Arena
 from lib.MCTS import MCTS
 from lib.progress.average import AverageMeter
-from lib.progress.bar import Bar
+from lib.progress.bar import ShadyBar
 
 
 class Coach:
@@ -19,7 +19,7 @@ class Coach:
     in Game and NeuralNet. args are specified in learn.py.
     """
 
-    def __init__(self, game, nnet, args):
+    def __init__(self, game, nnet, args, view=None):
         self.game = game
         self.nnet = nnet
         self.pnet = self.nnet.__class__(self.game)  # the competitor network
@@ -28,6 +28,7 @@ class Coach:
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
         self.curPlayer = 1
+        self.view = view
 
     def executeEpisode(self):
         """
@@ -55,7 +56,7 @@ class Coach:
             canonical_board = self.game.getCanonicalForm(board, self.curPlayer)
             temp = int(episode_step < self.args.tempThreshold)
 
-            pi = self.mcts.getActionProb(canonical_board, temp=temp)
+            pi = self.mcts.getActionProb(canonical_board, temp=temp)  # simulations (open nodes)
             sym = self.game.getSymmetries(canonical_board, pi)
             for b, p in sym:
                 train_examples.append([b, self.curPlayer, p, None])
@@ -85,7 +86,7 @@ class Coach:
                 iteration_train_examples = deque([], maxlen=self.args.maxlenOfQueue)
 
                 eps_time = AverageMeter()
-                bar = Bar('Self Play', max=self.args.numEps)
+                bar = ShadyBar('Self-play episodes', max=self.args.numEps)
                 end = time.time()
 
                 for eps in range(self.args.numEps):
@@ -99,6 +100,7 @@ class Coach:
                         eps=eps + 1, maxeps=self.args.numEps, et=eps_time.avg,
                         total=bar.elapsed_td, eta=bar.eta_td)
                     bar.next()
+
                 bar.finish()
 
                 # save the iteration examples to the history 
@@ -130,8 +132,8 @@ class Coach:
 
             print('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
-            pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
+                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game, self.view)
+            pwins, nwins, draws = arena.playGames(self.args.arenaCompare, verbose=4)
 
             print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
             if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < self.args.updateThreshold:

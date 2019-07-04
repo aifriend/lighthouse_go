@@ -60,10 +60,12 @@ def init_visuals(world_width: int, world_height: int, verbose=True) -> Optional[
 
 def update_graphics(board: np.ndarray, arena, screen, clock, fps: int = 1) -> bool:
     """
-    Executes game tick on canvas, redrawing whole game state. Values here are somewhat hardcoded, which can be changed to display game in some nicer config.
+    Executes game tick on canvas, redrawing whole game state. Values here are somewhat hardcoded, which can be changed
+    to display game in some nicer config.
     RTSLogic size 8x8 is working best with this config, 6x6 might work as well, but other might not.
     :param board: game state that will be drawn
-    :param game_display: canvas to draw game state upon
+    :param arena: canvas to draw game state upon
+    :param screen: canvas to draw game state upon
     :param clock: game tick
     :param fps: how many fps should pygame draw. if value is set to higher number than your pc can handle, it will draw at max possible.
     """

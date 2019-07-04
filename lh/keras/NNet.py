@@ -2,12 +2,13 @@
 NNet wrapper uses defined nnet model to train and predict
 
 """
+
 import os
 
 import numpy as np
 
 from lh.config.config import CONFIG
-from lh.config.configuration import VERBOSE_MODEL_FIT
+from lh.config.configuration import Configuration
 from lh.keras.LHNNet import LHNNet
 from lib.NeuralNet import NeuralNet
 
@@ -21,13 +22,9 @@ class NNetWrapper(NeuralNet):
         :param encoder: encoded that will be used for training and later predictions
         """
         # default
-        encoder = encoder or CONFIG.nnet_args.encoder
-
-        self.nnet = LHNNet(game, encoder)
-        self.board_x, self.board_y, num_encoders = game.getBoardSize()
-        self.action_size = game.getActionSize()
-
-        self.encoder = encoder
+        super().__init__()
+        self.encoder = encoder or CONFIG.nnet_args.encoder
+        self.nnet = LHNNet(game, self.encoder)
 
     def train(self, examples):
         """
@@ -45,7 +42,7 @@ class NNetWrapper(NeuralNet):
         input_boards = self.encoder.encode_multiple(input_boards)
 
         self.nnet.model.fit(x=input_boards, y=[target_pis, target_vs], batch_size=CONFIG.nnet_args.batch_size,
-                            epochs=CONFIG.nnet_args.epochs, verbose=VERBOSE_MODEL_FIT)
+                            epochs=CONFIG.nnet_args.epochs, verbose=Configuration.VERBOSE_MODEL_FIT)
 
     def predict(self, board, player=None):
         """

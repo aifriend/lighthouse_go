@@ -1,63 +1,76 @@
-from lh.config.configuration import LH_ENERGY_IDX, LH_OWNER_IDX, A_TYPE_IDX
+from lh.config.configuration import Configuration
 from lh.config.gameconfig import MoveError
 
 
 class Lighthouse(object):
+    DECAY = 10
 
     def __init__(self, game, pos):
-        self._id = pos[1] + pos[0]
         self._game = game
         self._pos = pos
         self._owner = 0
         self._energy = 0
 
     @property
-    def id(self):
-        return self._id
-
-    @property
     def pos(self):
         return self._pos
 
+    @property
+    def owner(self):
+        return self._owner
+
+    @owner.setter
+    def owner(self, value):
+        self._owner = value
+
+    @property
+    def energy(self):
+        return self._energy
+
     def lh_to_board(self, pieces):
-        pieces[self._pos[1], self._pos[0], A_TYPE_IDX] = self._id
+        pieces[self._pos[1], self._pos[0], Configuration.A_TYPE_IDX] = Configuration.d_a_type["Lighthouse"]
 
-    def energy_to_board(self, pieces, energy=-1, add=-1):
-        if energy >= 0:
+    def lh_energy_to_board(self, pieces, energy=None, add_energy=None):
+        if energy and energy >= 0:
             self._energy = energy
-        if add >= 0:
-            self._energy += add
-        pieces[self._pos[1], self._pos[0], LH_ENERGY_IDX] = self._energy
+        if add_energy and add_energy >= 0:
+            self._energy += add_energy
+        pieces[self._pos[1], self._pos[0], Configuration.LH_ENERGY_IDX] = int(round(self._energy))
 
-    def owner_to_board(self, pieces, owner=None):
+    def lh_owner_to_board(self, pieces, owner=None):
         if owner is not None:
             self._owner = owner
-        pieces[self._pos[1], self._pos[0], LH_OWNER_IDX] = self._owner
+        pieces[self._pos[1], self._pos[0], Configuration.LH_OWNER_IDX] = int(round(self._owner))
+
+    def board_to_lh_energy(self, pieces):
+        self._energy = int(round(pieces[self._pos[1], self._pos[0], Configuration.LH_ENERGY_IDX]))
+
+    def board_to_lh_owner(self, pieces):
+        self._owner = int(round(pieces[self._pos[1], self._pos[0], Configuration.LH_OWNER_IDX]))
 
     @staticmethod
-    def from_array(game, pieces):
+    def clear_board(pieces):
+        pieces[:, :, Configuration.LH_ENERGY_IDX] = 0
+        pieces[:, :, Configuration.LH_OWNER_IDX] = 0
+
+    @staticmethod
+    def init(board, lighthouses):
+        return dict((pos, Lighthouse(board, pos)) for i, pos in enumerate(lighthouses))
+
+    @staticmethod
+    def from_array(pieces, game):
         lh_list = dict()
-        dim_x, dim_y, enc = pieces.shape
-        for x in range(dim_x):
-            for y in range(dim_y):
-                lh_pose = (y, x)
-                if pieces[x][y][A_TYPE_IDX] != 0:
+        row, col, enc = pieces.shape
+        for y in range(row):
+            for x in range(col):
+                lh_pose = (x, y)
+                a_type = pieces[y, x, Configuration.A_TYPE_IDX]
+                if a_type == Configuration.d_a_type["Lighthouse"]:
                     lighthouse = Lighthouse(game, lh_pose)
-                    lighthouse.board_to_lh(pieces)
-                    lighthouse.board_to_energy(pieces)
-                    lighthouse.board_to_owner(pieces)
+                    lighthouse.board_to_lh_energy(pieces)
+                    lighthouse.board_to_lh_owner(pieces)
                     lh_list[lh_pose] = lighthouse
-
         return lh_list
-
-    def board_to_lh(self, pieces):
-        self._id = pieces[self._pos[1], self._pos[0], A_TYPE_IDX]
-
-    def board_to_energy(self, pieces):
-        self._energy = pieces[self._pos[1], self._pos[0], LH_ENERGY_IDX]
-
-    def board_to_owner(self, pieces):
-        self._owner = pieces[self._pos[1], self._pos[0], LH_OWNER_IDX]
 
     def attack(self, player, strength):
         if not isinstance(strength, int):
@@ -80,7 +93,7 @@ class Lighthouse(object):
         if self._energy <= 0:
             self._energy = 0
             self._owner = 0
-            self._game.close_conn(self._pos)
+            self._game.close_connection(self._pos)
 
     @staticmethod
     def owned_by(pieces, player=1):
@@ -91,11 +104,11 @@ class Lighthouse(object):
         :param player:
         :return:
         """
-        lh_owned = []
-        row, col = pieces.shape
-        for y in range(col):
-            for x in range(row):
-                if pieces[x][y][LH_OWNER_IDX] == player:
+        lh_owned = list()
+        row, col, enc = pieces.shape
+        for y in range(row):
+            for x in range(col):
+                if pieces[y, x, Configuration.LH_OWNER_IDX] == player:
                     lh_owned.append((y, x))
 
         return lh_owned

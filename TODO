@@ -1,3 +1,6 @@
+INSTALLATION NOTES
+====?=============
+
 For searching anaconda-cloud for non default libraries like pygame:
 	conda install anaconda-client
 	anaconda search -t conda pygame

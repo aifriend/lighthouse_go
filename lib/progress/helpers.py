@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+
 HIDE_CURSOR = '\x1b[?25l'
 SHOW_CURSOR = '\x1b[?25h'
 
@@ -44,17 +45,17 @@ class WritelnMixin(object):
             print(HIDE_CURSOR, end='', file=self.file)
 
     def clearln(self):
-        if self.file.isatty():
+        # if self.file.isatty():
             print('\r\x1b[K', end='', file=self.file)
 
     def writeln(self, line):
-        if self.file.isatty():
+        #if self.file.isatty():
             self.clearln()
             print(line, end='', file=self.file)
             self.file.flush()
 
     def finish(self):
-        if self.file.isatty():
+        #if self.file.isatty(): - snair, to print to stderr logfile
             print(file=self.file)
             if self.hide_cursor:
                 print(SHOW_CURSOR, end='', file=self.file)

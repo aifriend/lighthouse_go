@@ -3,7 +3,6 @@ Contains 3 players (human player, random player, greedy player (if searching for
 Human player has defined input controls for Pygame and console
 
 """
-
 import ctypes
 import os
 from math import sqrt

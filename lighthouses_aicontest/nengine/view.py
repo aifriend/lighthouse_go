@@ -17,6 +17,8 @@ PLAYERC = [
 
 
 class GameView(object):
+    FPS = 100
+
     def __init__(self, game):
         self.game = game
         pygame.init()
@@ -27,6 +29,27 @@ class GameView(object):
         self.fh = self.game.island.h * CELL * self.scale
         self.arena = pygame.Surface((self.fw, self.fh), 0, self.screen)
         self.nh = self.game.island.h - 1
+
+    def update(self):
+        self.arena.fill((0, 0, 0))
+        for cy in range(self.game.island.h):
+            for cx in range(self.game.island.w):
+                if self.game.island[cx, cy]:
+                    self.draw_cell((cx, cy))
+        for (x0, y0), (x1, y1) in self.game.conns:
+            owner = self.game.lighthouses[x0, y0].owner
+            color = PLAYERC[owner]
+            y0, y1 = self.nh - y0, self.nh - y1
+            self._aaline((x0 * CELL + CELL / 2, y0 * CELL + CELL / 2), (x1 * CELL + CELL / 2, y1 * CELL + CELL / 2), color)
+        self.screen.blit(self.arena, (0, 0))
+        pygame.display.flip()
+        pygame.time.Clock().tick(self.FPS)
+
+    def closeEvent(self) -> bool:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:  # This would be a quit event.
+                return True  # So the user can close the program
+        return False
 
     def _afill(self, xy, wh, c):
         x0, y0 = xy
@@ -104,24 +127,3 @@ class GameView(object):
             if lh.owner is not None:
                 color = PLAYERC[lh.owner]
             self._diamond((px + CELL / 2, py + CELL / 2), 4, color, 0)
-
-    def update(self):
-        self.arena.fill((0, 0, 0))
-        for cy in range(self.game.island.h):
-            for cx in range(self.game.island.w):
-                if self.game.island[cx, cy]:
-                    self.draw_cell((cx, cy))
-        for (x0, y0), (x1, y1) in self.game.conns:
-            owner = self.game.lighthouses[x0, y0].owner
-            color = PLAYERC[owner]
-            y0, y1 = self.nh - y0, self.nh - y1
-            self._aaline((x0 * CELL + CELL / 2, y0 * CELL + CELL / 2), (x1 * CELL + CELL / 2, y1 * CELL + CELL / 2),
-                         color)
-        self.screen.blit(self.arena, (0, 0))
-        pygame.display.flip()
-
-    def closeEvent(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:  # This would be a quit event.
-                return True  # So the user can close the program
-        return False

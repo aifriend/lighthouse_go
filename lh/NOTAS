@@ -103,3 +103,33 @@ DATA
 SCORE
 =====
 Points
+
+SIMETRY
+=======
+    18 filas
+    21 columnas
+
+    np.rot90 -> clockwise
+
+    # down -> left -> up -> right -> down
+    # downright -> downleft -> upleft -> upright -> downright
+    # attack 10% -> attack 30% -> attack 60% -> attack 80% -> attack 100%
+    # connect0 -> connect1 -> connect2 -> connect3 -> connect4
+    possible_moves = {1: (0, -1),   # down -> left -> up
+                      2: (0, 1),    # up -> right -> down
+                      3: (1, 0),    # right -> down -> left
+                      4: (-1, 0),   # left -> up -> right
+                      5: (1, -1),   # downright -> downleft -> upleft
+                      6: (-1, -1),  # downleft -> upleft -> upright
+                      7: (1, 1),    # upright -> downright -> downleft
+                      8: (-1, 1)}   # upleft -> upright -> downright
+    possible_attack = {9: 0.1,      # attack 10%
+                       10: 0.3,     # attack 30%
+                       11: 0.6,     # attack 60%
+                       12: 0.8,     # attack 80%
+                       13: 1.0}     # attack 100%
+    possible_lh_connections = {14: "connect0",
+                               15: "connect1",
+                               16: "connect2",
+                               17: "connect3",
+                               18: "connect4"}

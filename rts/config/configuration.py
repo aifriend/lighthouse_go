@@ -28,7 +28,7 @@ SHOW_PYGAME_WELCOME = False
 VERBOSE_MODEL_FIT = 1  # 0 = silent, 1 = progress bar, 2 = one line per epoch.
 
 # Maximum number of fps Pygame will render game at. Only relevant when running with verbose > 3
-FPS = 1000
+FPS = 100
 
 # ##################################
 # ########### ENCODERS #############

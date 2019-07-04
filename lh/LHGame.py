@@ -4,15 +4,15 @@ import numpy as np
 
 from lh.LHLogic import LHLogic
 from lh.config.config import CONFIG
-from lh.config.configuration import NUM_ENCODERS, NUM_ACTS, P_NAME_IDX, TIME_IDX
+from lh.config.configuration import Configuration
 from lib.Game import Game
 
 
 class LHGame(Game):
     def __init__(self) -> None:
         super().__init__()
-
         self.logic = LHLogic(CONFIG.board_file_path)
+        self.logic.initialize()
 
     def getInitBoard(self) -> np.ndarray:
         """
@@ -20,77 +20,66 @@ class LHGame(Game):
         """
         self.logic.initialize()
 
-        pieces = np.zeros((self.logic.board.size["height"], self.logic.board.size["width"], NUM_ENCODERS))
+        # board pieces initialization
+        pieces = np.zeros((self.logic.board.size[0], self.logic.board.size[1], Configuration.NUM_ENCODERS))
 
         # remaining time is stored in all squares
-        pieces[:, :, TIME_IDX] = CONFIG.timeout
+        pieces[:, :, Configuration.TIME_IDX] = CONFIG.timeout
 
         # get pieces from actual board state
-        pieces = self.logic.board.to_array(pieces)
+        pieces = self.logic.to_array(pieces)
 
         return pieces
 
-    def getBoardSize(self) -> Tuple[int, int, int]:
-        """
-        Get board size
-
-        :return:
-        """
-        return self.logic.board.size["width"], self.logic.board.size["height"], NUM_ENCODERS
-
-    def getNextState(self, board: np.ndarray, player: int, action: int) -> Tuple[np.ndarray, int]:
+    def getNextState(self, board: np.ndarray, player_id: int, move: int) -> Tuple[np.ndarray, int]:
         """
         Gets next state for board. It also updates tick for board as game tick iterations are transfered
         within board as the last encoded parameter
 
         :param board: current board
-        :param player: player executing action
-        :param action: action to apply to new board
+        :param player_id: player executing action
+        :param move: move to apply to new board
         :return: new board with applied action
         """
         # update board status
-        self.logic.board.from_array(board)
+        self.logic.from_array(board)
 
-        # first execute move, then run time function to destroy any actors if needed
-        self.logic.get_next_state(action, player)
+        # pre-round game player and lh energy update
+        self.logic.board.pre_round()
 
-        # get pieces from actual board state
-        pieces = self.logic.board.to_array(board)
+        # player keys and energy update
+        self.logic.board.pre_player_update(player_id)
 
-        # get config for timeout
-        # update timer on every tile:
-        pieces[:, :, TIME_IDX] -= 1
+        # execute move
+        self.logic.get_next_state(player_id, move, board)
 
-        return pieces, -player
+        # player score update
+        self.logic.board.post_player_update(player_id)
 
-    def getActionSize(self) -> int:
-        return NUM_ACTS
+        # update board pieces
+        pieces = self.logic.to_array(board)
 
-    def getValidMoves(self, board: np.ndarray, player: int) -> np.ndarray:
-        """
-        Returns all valid actions for specific tile
+        # get config for timeout: update timer on every tile:
+        pieces[:, :, Configuration.TIME_IDX] -= 1
 
-        :param board:
-        :param player:
-        :return:
-        """
+        return pieces, -player_id
+
+    def getValidMoves(self, board: np.ndarray, player_id: int) -> np.ndarray:
         # update board status
-        self.logic.board.from_array(board)
+        self.logic.from_array(board)
 
-        # apply config and prepare board for player turn
-        if player == 1:
-            config = CONFIG.player1_config
-            self.logic.board.pre_round()
-        else:
-            config = CONFIG.player2_config
-            self.logic.board.post_round()
+        # on-the-fly pre-round game update
+        self.logic.board.pre_round()
+
+        # player game update
+        self.logic.board.pre_player_update(player_id)
 
         # select valid moves
-        valid = self.logic.get_valid_moves(player, config=config)
+        valid = self.logic.get_valid_moves(player_id)
 
         return np.array(valid)
 
-    def getGameEnded(self, board: np.ndarray, player) -> float:
+    def getGameEnded(self, board: np.ndarray, player_id) -> float:
         """
         It is hard to decide when to finish real time strategy game, as players might not have enough time
         to execute wanted actions, but in the other hand, if players are left to play for too long, games become
@@ -99,78 +88,99 @@ class LHGame(Game):
         to be more useful, as it can be applied in 3d real time strategy games easier and more sensibly.
 
         :param board: current game state
-        :param player: current player
+        :param player_id: current player
         :return: real number on interval [-1,1] - return 0 if not ended, 1 if player 1 won, -1 if player 1 lost, 0.001 if tie
         """
         # update board status
-        self.logic.board.from_array(board)
+        self.logic.from_array(board)
 
         # detect timeout
-        if board[0, 0, TIME_IDX] < 1:
-            score_player1 = self.getScore(board, player)
-            score_player2 = self.getScore(board, -player)
+        if board[0, 0, Configuration.TIME_IDX] < 1:
+            score_player1 = self.get_score(board, player_id)
+            score_player2 = self.get_score(board, -player_id)
             if score_player1 == score_player2:
                 return 0.001
             better_player = 1 if score_player1 > score_player2 else -1
             return better_player
 
-        # detect no valid actions -
-        # possible tie by overpopulating on non-attacking units and buildings -
-        # all fields are full or one player is surrounded:
-        if sum(self.getValidMoves(board, 1)) == 0:
+        # detect no valid actions
+        if not self.logic.valid_moves_left(1):
             return -1
 
-        if sum(self.getValidMoves(board, -1)) == 0:
+        if not self.logic.valid_moves_left(-1):
             return 1
 
         # continue game
         return 0
 
-    def getCanonicalForm(self, board: np.ndarray, player: int) -> np.ndarray:
-        """
+    def getBoardSize(self) -> Tuple[int, int, int]:
+        return self.logic.board.size[0], self.logic.board.size[1], Configuration.NUM_ENCODERS
 
-        :param board:
-        :param player:
-        :return:
-        """
-        b = np.copy(board)
-        b[:, :, P_NAME_IDX] = b[:, :, P_NAME_IDX] * player
-        return b
+    def getActionSize(self) -> int:
+        return self.logic.board.size[0] * self.logic.board.size[1] * Configuration.NUM_ACTS
+
+    def getCanonicalForm(self, board: np.ndarray, player_id: int) -> np.ndarray:
+        self.logic.from_array(board)
+
+        # revert player
+        for player in self.logic.board.players.values():
+            player.turn = player.turn * player_id
+
+        # revert lighthouse
+        for lh in self.logic.board.lighthouses.values():
+            lh.owner = lh.owner * player_id
+
+        # get board pieces
+        n_board = self.logic.board.to_array(board)
+
+        return n_board
 
     def getSymmetries(self, board: np.ndarray, pi):
-        """
-
-        :param board:
-        :param pi:
-        :return:
-        """
-        # mirror, rotational
-        assert (len(pi) == self.logic.board.size["width"] * self.logic.board.size["height"] * NUM_ACTS)
-        pi_board = np.reshape(pi[:-1], (self.logic.board.size["width"], self.logic.board.size["height"], NUM_ACTS))
-        return_list = []
-        for i in range(1, 5):
-            for j in [True, False]:
-                new_b = np.rot90(board, i)
-                new_pi = np.rot90(pi_board, i)
-                if j:
-                    new_b = np.fliplr(new_b)
-                    new_pi = np.fliplr(new_pi)
-                return_list += [(new_b, list(new_pi.ravel()))]
+        row, col = self.logic.board.size
+        assert (len(pi) == row * col * Configuration.NUM_ACTS)
+        pi_board = np.reshape(pi, (row, col, Configuration.NUM_ACTS))
+        # squared, mirror and rotational
+        is_square = all(len(row) == len(board) for row in board)
+        if is_square:
+            return_list = []
+            for i in range(1, 5):
+                for j in [True, False]:
+                    new_b = np.rot90(board, i)
+                    new_pi = np.rot90(pi_board, i)
+                    if j:
+                        new_b = np.fliplr(new_b)
+                        new_pi = np.fliplr(new_pi)
+                    return_list += [(new_b, list(new_pi.ravel()))]
+        else:
+            return_list = []
+            for i in range(2, 5, 2):
+                for j in [True, False]:
+                    new_b = np.rot90(board, i)
+                    new_pi = np.rot90(pi_board, i)
+                    if j:
+                        new_b = np.fliplr(new_b)
+                        new_pi = np.fliplr(new_pi)
+                    return_list += [(new_b, list(new_pi.ravel()))]
 
         return return_list
 
     def stringRepresentation(self, board: np.ndarray) -> bytes:
         return board.tostring()
 
-    def getScore(self, board: np.array, player: int) -> int:
+    def get_score(self, board: np.array, turn: int) -> int:
         """
-        Uses one of 3 elo functions that determine better player
+        Uses an elo function that determine better player
 
         :param board: game state
-        :param player: current player
+        :param turn: current player
         :return: elo for current player on this board
         """
         # update board status
-        self.logic.board.from_array(board)
+        self.logic.from_array(board)
 
-        return self.logic.board.get_score(player)
+        # get player
+        player = self.logic.board.player_by(turn)
+        opponent = self.logic.board.player_by(-turn)
+        assert player and opponent
+
+        return player.score - opponent.score

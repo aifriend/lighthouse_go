@@ -76,3 +76,31 @@ INPUT
 
 PUNTUACION
 ----------
+Cada jugador tendrá una puntuación (0 al comienzo de la partida), que es un
+número entero. Se obtendrán puntos al término de cada ronda de la siguiente
+forma:
+
+- 2 puntos por cada faro bajo control del jugador.
+- 2 puntos por cada pareja de faros conectados bajo el control del jugador.
+- Por cada 3 faros conectados entre sí bajo su control (formando un triángulo):
+  - 1 punto por cada casilla cuyo centro esté dentro de dicho triángulo.
+
+  Nota 1: es posible que las áreas se solapen, y, en ese caso, puntúan doble.
+  Por ejemplo, en esta configuración de faros conectados existen 3 triángulos
+  interiores y un triángulo exterior, de forma que la cantidad de puntos
+  otorgados será equivalente al DOBLE del área del triángulo exterior.
+
+  o-----o
+   \`o'/
+    \|/
+     o
+
+  Igualmente, es posible que un área de un jugador contenga completamente a
+  un área de otro jugador. En este caso cada jugador obtiene sus puntos
+  correspondientes. Es decir, la casilla se puede "iluminar" de una mezcla de
+  colores.
+
+  Nota 2: Cuando un lado del triángulo pasa por el centro de una casilla, se
+  utilizará la regla de rasterización de OpenGL para determinar qué casillas
+  se consideran como parte del área (cuentan las casillas superiores y a la
+  izquierda): http://goo.gl/f1cxU

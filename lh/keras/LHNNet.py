@@ -10,14 +10,14 @@ from tensorflow.python.keras.layers import Conv2D, BatchNormalization, Activatio
 from tensorflow.python.keras.optimizers import Adam
 
 from lh.config.config import CONFIG
-from lh.config.configuration import USE_TF_CPU, SHOW_TENSORFLOW_GPU, DISABLE_TENSORFLOW_WARNING
+from lh.config.configuration import Configuration
 
-if USE_TF_CPU:
+if Configuration.USE_TF_CPU:
     print("Using TensorFlow CPU")
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-if not SHOW_TENSORFLOW_GPU:
+if not Configuration.SHOW_TENSORFLOW_GPU:
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-elif DISABLE_TENSORFLOW_WARNING:
+elif Configuration.DISABLE_TENSORFLOW_WARNING:
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
@@ -30,38 +30,33 @@ class LHNNet:
         """
 
         # game params
-        self.board_x, self.board_y, num_encoders = game.getBoardSize()
+        self.board_x, self.board_y, _ = game.getBoardSize()
+        self.num_encoders = encoder.num_encoders
         self.action_size = game.getActionSize()
 
-        """
-        num_encoders = CONFIG.nnet_args.encoder.num_encoders
-        """
-        num_encoders = encoder.num_encoders
+        self.model = self._h4()
 
+    def _h4(self):
         # Neural Net
-        self.input_boards = Input(
-            shape=(self.board_x, self.board_y, num_encoders))  # s: batch_size x board_x x board_y x num_encoders
+        input_boards = Input(
+            shape=(self.board_x, self.board_y, self.num_encoders))  # s: batch_size x board_x x board_y x num_encoders
 
-        x_board = Reshape((self.board_x, self.board_y, num_encoders))(
-            self.input_boards)  # batch_size  x board_x x board_y x num_encoders
+        x_board = Reshape((self.board_x, self.board_y, self.num_encoders))(
+            input_boards)  # batch_size  x board_x x board_y x num_encoders
 
         h_conv1 = Activation('relu')(BatchNormalization(axis=3)(
-            Conv2D(CONFIG.nnet_args.num_channels, 3, padding='same', use_bias=False)(
+            Conv2D(CONFIG.nnet_args.num_channels, (3, 3), padding='same', use_bias=False)(
                 x_board)))  # batch_size  x board_x x board_y x num_channels
 
         h_conv2 = Activation('relu')(BatchNormalization(axis=3)(
-            Conv2D(CONFIG.nnet_args.num_channels, 3, padding='same', use_bias=False)(
+            Conv2D(CONFIG.nnet_args.num_channels, (3, 3), padding='same', use_bias=False)(
                 h_conv1)))  # batch_size  x board_x x board_y x num_channels
 
         h_conv3 = Activation('relu')(BatchNormalization(axis=3)(
-            Conv2D(CONFIG.nnet_args.num_channels, 3, padding='valid', use_bias=False)(
+            Conv2D(CONFIG.nnet_args.num_channels, (3, 3), padding='valid', use_bias=False)(
                 h_conv2)))  # batch_size  x (board_x-2) x (board_y-2) x num_channels
 
-        h_conv4 = Activation('relu')(BatchNormalization(axis=3)(
-            Conv2D(CONFIG.nnet_args.num_channels, 3, padding='valid', use_bias=False)(
-                h_conv3)))  # batch_size  x (board_x-4) x (board_y-4) x num_channels
-
-        h_conv4_flat = Flatten()(h_conv4)
+        h_conv4_flat = Flatten()(h_conv3)
 
         s_fc1 = Dropout(CONFIG.nnet_args.dropout)(Activation('relu')(BatchNormalization(axis=1)(
             Dense(256, use_bias=False)(h_conv4_flat))))  # batch_size x 1024
@@ -69,8 +64,10 @@ class LHNNet:
         s_fc2 = Dropout(CONFIG.nnet_args.dropout)(Activation('relu')(BatchNormalization(axis=1)(
             Dense(128, use_bias=False)(s_fc1))))  # batch_size x 1024
 
-        self.pi = Dense(self.action_size, activation='softmax', name='pi')(s_fc2)  # batch_size x self.action_size
-        self.v = Dense(1, activation='tanh', name='v')(s_fc2)  # batch_size x 1
+        pi = Dense(self.action_size, activation='softmax', name='pi')(s_fc2)  # batch_size x self.action_size
+        v = Dense(1, activation='tanh', name='v')(s_fc2)  # batch_size x 1
 
-        self.model = Model(inputs=self.input_boards, outputs=[self.pi, self.v])
-        self.model.compile(loss=['categorical_crossentropy', 'mean_squared_error'], optimizer=Adam(CONFIG.nnet_args.lr))
+        t2_h4 = Model(inputs=input_boards, outputs=[pi, v])
+        t2_h4.compile(loss=['categorical_crossentropy', 'mean_squared_error'], optimizer=Adam(CONFIG.nnet_args.lr))
+
+        return t2_h4
