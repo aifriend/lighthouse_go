@@ -67,7 +67,7 @@ class LHNNet:
         pi = Dense(self.action_size, activation='softmax', name='pi')(s_fc2)  # batch_size x self.action_size
         v = Dense(1, activation='tanh', name='v')(s_fc2)  # batch_size x 1
 
-        t2_h4 = Model(inputs=input_boards, outputs=[pi, v])
-        t2_h4.compile(loss=['categorical_crossentropy', 'mean_squared_error'], optimizer=Adam(CONFIG.nnet_args.lr))
+        model = Model(inputs=input_boards, outputs=[pi, v])
+        model.compile(loss=['categorical_crossentropy', 'mean_squared_error'], optimizer=Adam(CONFIG.nnet_args.lr))
 
-        return t2_h4
+        return model

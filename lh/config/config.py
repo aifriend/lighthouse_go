@@ -12,7 +12,7 @@ CONFIG = LHConfig(num_iters=100,  # iteration of episodes
                   arena_compare=8,  # even
                   timeout_player=200,
                   load_train_examples=False,
-                  load_model=False)
+                  load_model=True)
 
 # ################################### Run 1 #########################################
 """
