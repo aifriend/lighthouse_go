@@ -30,7 +30,7 @@ class Coach:
         self.curPlayer = 1
         self.view = view
 
-    def executeEpisode(self):
+    def executeEpisode(self, numEps=-1):
         """
         This function executes one episode of self-play, starting with player 1.
         As the game is played, each turn is added as a training example to
@@ -51,6 +51,10 @@ class Coach:
         self.curPlayer = 1
         episode_step = 0
 
+        eps_time = AverageMeter()
+        bar = ShadyBar('Episode step %s/%s' % (numEps + 1, self.args.numEps), max=self.args.game_timeout * 2)
+        end = time.time()
+
         while True:
             episode_step += 1
             canonical_board = self.game.getCanonicalForm(board, self.curPlayer)
@@ -67,7 +71,16 @@ class Coach:
             r = self.game.getGameEnded(board, self.curPlayer)
 
             if r != 0:  # game ended
+                bar.finish()
                 return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in train_examples]
+            elif numEps >= 0:
+                # bookkeeping + plot progress
+                eps_time.update(time.time() - end)
+                end = time.time()
+                bar.suffix = '({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}'.format(
+                    eps=episode_step + 1, maxeps=self.args.game_timeout * 2, et=eps_time.avg,
+                    total=bar.elapsed_td, eta=bar.eta_td)
+                bar.next()
 
     def learn(self):
         """
@@ -91,7 +104,7 @@ class Coach:
 
                 for eps in range(self.args.numEps):
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
-                    iteration_train_examples += self.executeEpisode()
+                    iteration_train_examples += self.executeEpisode(numEps=eps)
 
                     # bookkeeping + plot progress
                     eps_time.update(time.time() - end)
@@ -113,7 +126,7 @@ class Coach:
 
             # backup history to a file
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
-            self.saveTrainExamples(i - 1)
+            # self.saveTrainExamples(i - 1)
 
             # shuffle examples before training
             train_examples = []
@@ -127,12 +140,13 @@ class Coach:
             pmcts = MCTS(self.game, self.pnet, self.args)  # previous net
 
             # re-train network
+            print('Retrain with %d examples...' % len(train_examples))
             self.nnet.train(train_examples)
             nmcts = MCTS(self.game, self.nnet, self.args)  # new net
 
             print('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game, self.view)
+                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game, self.args, self.view)
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare, verbose=4)
 
             print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
@@ -156,17 +170,21 @@ class Coach:
         with open(filename, "wb+") as f:
             Pickler(f).dump(self.trainExamplesHistory)
 
-    def loadTrainExamples(self):
-        modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
-        examplesFile = modelFile + ".examples"
-        if not os.path.isfile(examplesFile):
-            print(examplesFile)
-            r = input("File with trainExamples not found. Continue? [y|n]")
-            if r != "y":
-                sys.exit()
-        else:
-            print("File with trainExamples found. Read it.")
-            with open(examplesFile, "rb") as f:
-                self.trainExamplesHistory = Unpickler(f).load()
-            # examples based on the model were already collected (loaded)
-            self.skipFirstSelfPlay = True
+    def loadTrainExamples(self, n_train):
+        example_history = []
+        for i in range(1, n_train + 1):
+            filename = self.args.load_train_folder_file[1] + str(i) + '.pth.tar.examples'
+            train_file = os.path.join(self.args.load_train_folder_file[0], filename)
+            if not os.path.isfile(train_file):
+                print(train_file)
+                r = input("File with trainExamples not found. Continue? [y|n]")
+                if r != "y":
+                    sys.exit()
+            else:
+                print("File (" + filename + ") with trainExamples found. Read it.")
+                with open(train_file, "rb") as f:
+                    example_history.extend(Unpickler(f).load())
+                # examples based on the model were already collected (loaded)
+                self.skipFirstSelfPlay = True
+
+        self.trainExamplesHistory = example_history

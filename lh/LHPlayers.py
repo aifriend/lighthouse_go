@@ -26,7 +26,7 @@ class RandomLHPlayer:
 
         y, x, action_index = np.unravel_index(action, [board.shape[0], board.shape[1], Configuration.NUM_ACTS])
         print("RP > returned act: Col(%s) Row(%s) Action(%s) Index(%r:%r)" % (
-        x, y, Configuration.ACTS_REV[action_index], action, action_index))
+            x, y, Configuration.ACTS_REV[action_index], action, action_index))
 
         return action
 
@@ -45,7 +45,7 @@ class GreedyLHPlayer:
             if valid[a] == 0:
                 continue
             next_board, _ = self.game.getNextState(board, 1, a)
-            score = self.game.get_score(next_board, 1)
+            score = self.game.get_score_by(next_board, 1)
             candidates += [(-score, a)]
 
         # select best action on present state
@@ -53,7 +53,7 @@ class GreedyLHPlayer:
         action = candidates[0][1]
         y, x, action_index = np.unravel_index(action, [board.shape[0], board.shape[1], Configuration.NUM_ACTS])
         print("GP > > returned act: Col(%s) Row(%s) Action(%s) Index(%r:%r)" % (
-        x, y, Configuration.ACTS_REV[action_index], action, action_index))
+            x, y, Configuration.ACTS_REV[action_index], action, action_index))
 
         return action
 
@@ -90,7 +90,7 @@ class HumanLHPlayer:
                 self._display_valid_moves(board, valid)
 
         print("HP > returned act: Col(%s) Row(%s) Action(%s) Index(%r:%r)" % (
-        tup[0], tup[1], Configuration.ACTS_REV[tup[2]], a, action_index))
+            tup[0], tup[1], Configuration.ACTS_REV[tup[2]], a, action_index))
 
         return a
 

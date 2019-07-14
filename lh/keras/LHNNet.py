@@ -45,15 +45,15 @@ class LHNNet:
             input_boards)  # batch_size  x board_x x board_y x num_encoders
 
         h_conv1 = Activation('relu')(BatchNormalization(axis=3)(
-            Conv2D(CONFIG.nnet_args.num_channels, (3, 3), padding='same', use_bias=False)(
+            Conv2D(CONFIG.nnet_args.num_channels, 3, padding='same', use_bias=False)(
                 x_board)))  # batch_size  x board_x x board_y x num_channels
 
         h_conv2 = Activation('relu')(BatchNormalization(axis=3)(
-            Conv2D(CONFIG.nnet_args.num_channels, (3, 3), padding='same', use_bias=False)(
+            Conv2D(CONFIG.nnet_args.num_channels, 3, padding='same', use_bias=False)(
                 h_conv1)))  # batch_size  x board_x x board_y x num_channels
 
         h_conv3 = Activation('relu')(BatchNormalization(axis=3)(
-            Conv2D(CONFIG.nnet_args.num_channels, (3, 3), padding='valid', use_bias=False)(
+            Conv2D(CONFIG.nnet_args.num_channels, 3, padding='valid', use_bias=False)(
                 h_conv2)))  # batch_size  x (board_x-2) x (board_y-2) x num_channels
 
         h_conv4_flat = Flatten()(h_conv3)

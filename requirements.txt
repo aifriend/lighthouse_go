@@ -1,5 +1,5 @@
 tensorflow==1.13.1
 pygame==1.9.4
 numpy==1.16.3
-typing==3.6.6
+typing==3.6.4
 progress==1.5

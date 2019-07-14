@@ -1,11 +1,11 @@
 import argparse
-import math
 import os
 import random
 import shutil
 import sys
 import time
 
+import math
 import numpy as np
 
 sys.path.append('..')

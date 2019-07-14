@@ -4,16 +4,38 @@ from lh.config.LHConfig import LHConfig
 # CONFIG = Configuration()
 
 # ###########################   Example learning   #################################
-CONFIG = LHConfig(num_iters=100,  # iteration of episodes
-                  num_iters_for_train_examples_history=30,
-                  num_eps=6,  # episode of self-playing game
-                  num_mcts_sims=5,  # mcts open nodes
-                  epochs=10,  # complete whole dataset (in batches) for nnet to learn
-                  arena_compare=8,  # even
+CONFIG = LHConfig(board_file_path=('./config/maps/', 'island.txt'),
+                  num_iters=5,  # iteration of episodes
+                  num_mcts_sims=15,  # MCTS open nodes
+                  num_eps=3,  # episode of self-playing game
+                  epochs=100,  # complete whole dataset (in batches) for nnet to learn
+                  cpuct=1.0,  # exploration MCTS parameter
+                  temp_threshold=200,
                   timeout_player=200,
+                  arena_compare=4,
+                  num_iters_for_train_examples_history=3,
+                  update_threshold=8,
                   load_train_examples=False,
-                  load_model=True)
+                  load_train_folder_file=('./temp/', 'checkpoint_train_'),
+                  load_model=False,
+                  load_model_folder_file=('./temp/', 'best.pth.tar'))
 
+# ###########################   Learning Pit   #################################
+"""
+CONFIG = LHConfig(timeout_player=200,
+                  num_games=2,  # even
+                  num_iters_for_train_examples_history=3,
+                  player1_type='human',
+                  player2_type='random')
+
+CONFIG = LHConfig(timeout_player=200,
+                  num_games=2,  # even
+                  num_iters_for_train_examples_history=3,
+                  player1_type='human',
+                  player2_type='nnet',
+                  player2_config={'numMCTSSims': 5, 'cpuct': 2.0},
+                  player2_model_file='best.pth.tar')
+"""
 # ################################### Run 1 #########################################
 """
 CONFIG = Configuration(num_iters=100,

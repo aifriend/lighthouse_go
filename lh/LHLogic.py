@@ -10,6 +10,7 @@ class LHLogic:
     Defines game rules (action checking, end-game conditions)
     can_execute_move is checking if move can be executed and execute_move is applying this move to new board
     """
+
     def __init__(self, cfg_file) -> None:
         self.config_file = cfg_file
         self._board = Board()
@@ -102,7 +103,7 @@ class LHLogic:
         # No action found to be returned
         assert False
 
-    def get_valid_moves(self, turn):
+    def _get_valid_moves(self, turn):
         # get player
         player = self._board.player_by(turn)
         if not player:
@@ -131,6 +132,50 @@ class LHLogic:
                     moves.extend([0] * Configuration.NUM_ACTS)
 
         # return the generated move list
+        return moves
+
+    def get_valid_moves(self, turn):
+        # get player
+        player = self._board.player_by(turn)
+        if not player:
+            return None
+
+        # get valid moves
+        moves = []
+
+        # select valid moves
+        for row in range(self._board.size[0]):
+            for col in range(self._board.size[1]):
+                if (col, row) == player.pos:
+
+                    # AVAILABLE ACTION - LH - CONN
+                    valid_conn = self._board.get_available_lh_connection_moves(player)
+                    if sum(valid_conn) > 0:
+                        moves.extend(valid_conn)
+                        continue
+
+                    # AVAILABLE ACTION - WK - ATTACK
+                    valid_attack = self._board.get_available_attack_moves(player)
+                    if sum(valid_attack) > 0:
+                        moves.extend(valid_attack)
+                        continue
+
+                    # AVAILABLE ACTION - WK - MOVE
+                    valid_move = self._board.get_available_worker_moves(player)
+                    if sum(valid_move) > 0:
+                        moves.extend(valid_move)
+                        continue
+
+                    # NOT AVAILABLE ACTION FOR THIS PLAYER
+                    moves.extend([0] * Configuration.NUM_ACTS)
+
+                else:
+                    # return the generated move list
+                    moves.extend([0] * Configuration.NUM_ACTS)
+
+        # (7182,)->(7163,)
+        assert len(moves) == 7182
+
         return moves
 
     def valid_moves_left(self, turn):

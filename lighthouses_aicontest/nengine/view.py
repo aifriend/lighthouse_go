@@ -40,7 +40,8 @@ class GameView(object):
             owner = self.game.lighthouses[x0, y0].owner
             color = PLAYERC[owner]
             y0, y1 = self.nh - y0, self.nh - y1
-            self._aaline((x0 * CELL + CELL / 2, y0 * CELL + CELL / 2), (x1 * CELL + CELL / 2, y1 * CELL + CELL / 2), color)
+            self._aaline((x0 * CELL + CELL / 2, y0 * CELL + CELL / 2), (x1 * CELL + CELL / 2, y1 * CELL + CELL / 2),
+                         color)
         self.screen.blit(self.arena, (0, 0))
         pygame.display.flip()
         pygame.time.Clock().tick(self.FPS)

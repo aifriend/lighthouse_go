@@ -145,7 +145,8 @@ class LHConfig:
                      cpuct,
                      checkpoint,
                      load_model,
-                     load_folder_file,
+                     load_model_folder_file,
+                     load_train_folder_file,
                      num_iters_for_train_examples_history,
                      save_train_examples,
                      load_train_examples,
@@ -161,7 +162,8 @@ class LHConfig:
 
             self.checkpoint = checkpoint
             self.load_model = load_model  # Load training examples from file - WARNING - this is disabled in LHPlayers.py because of memory errors received when loading data from file
-            self.load_folder_file = load_folder_file
+            self.load_model_folder_file = load_model_folder_file
+            self.load_train_folder_file = load_train_folder_file
             self.numItersForTrainExamplesHistory = num_iters_for_train_examples_history  # maximum number of 'iterations' that game episodes are kept in queue. After that last is popped and new one is added.
 
             self.save_train_examples = save_train_examples
@@ -185,18 +187,20 @@ class LHConfig:
 
                  num_iters: int = 4,
                  num_eps: int = 4,
-                 temp_threshold: int = 100,
-                 update_threshold: float = 0.6,
+                 temp_threshold: int = 10,
+                 update_threshold: float = 0.7,
                  maxlen_of_queue: int = 6400,
                  num_mcts_sims: int = 10,
                  arena_compare: int = 10,
                  cpuct: float = 1.41,  # sqrt(2) - MCTS(exploration/explotation)
                  checkpoint: str = './temp/',
                  load_model: bool = False,
-                 load_folder_file: Tuple[str, str] = ('./temp/', 'checkpoint_0.pth.tar'),
+                 load_model_folder_file: Tuple[str, str] = ('./temp/', 'checkpoint_0.pth.tar'),
+                 load_train_folder_file: Tuple[str, str] = ('./temp/', 'checkpoint_train_'),
                  num_iters_for_train_examples_history: int = 8,
                  save_train_examples: bool = False,
                  load_train_examples: bool = False,
+                 board_file_path: Tuple[str, str] = ('./config/maps/', 'island.txt'),
 
                  # nnet, greedy, human, random
                  player1_type: str = 'random',
@@ -234,7 +238,9 @@ class LHConfig:
         :param cpuct: Exploration parameter for MCTS
         :param checkpoint: folder where checkpoints should be saved while learning
         :param load_model: If model is loaded from checkpoint on learning start
-        :param load_folder_file: tuple(folder, file) where model is loaded from
+        :param load_model_folder_file: tuple(folder, file) where model is loaded from
+        :param load_train_folder_file: tuple(folder, file) where training examples is loaded from
+        :param board_file_path: path to map file to play with
         :param num_iters_for_train_examples_history: How many iterations of train examples should be kept for learning. If this number is exceeded, oldest iteration of train exaples is removed from queue
         :param save_train_examples: If train examples should be saved to file (Caution if choosing this, because of memory error)
         :param load_train_examples: If train examples should be loaded from file (Caution if choosing this, because of memory error)
@@ -257,7 +263,7 @@ class LHConfig:
         self.config_file_pit = "./temp/config_pit.csv"
         self.config_file_learn = "./temp/config_learn.csv"
 
-        self.board_file_path = "./config/maps/island.txt"
+        self.board_file_path = board_file_path
 
         self.visibility = 4
         self._pit_visibility = pit_visibility
@@ -287,7 +293,8 @@ class LHConfig:
             cpuct=cpuct,
             checkpoint=checkpoint,
             load_model=load_model,
-            load_folder_file=load_folder_file,
+            load_model_folder_file=load_model_folder_file,
+            load_train_folder_file=load_train_folder_file,
             num_iters_for_train_examples_history=num_iters_for_train_examples_history,
             save_train_examples=save_train_examples,
             load_train_examples=load_train_examples,
@@ -320,6 +327,3 @@ class LHConfig:
         else:
             print("Unrecognised runner. Returning")
             exit(1)
-
-    def set_board(self, path_to_board=None):
-        self.board_file_path = path_to_board

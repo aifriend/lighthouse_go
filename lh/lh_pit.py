@@ -14,5 +14,6 @@ v = LHView(g)
 
 player1, player2 = CONFIG.pit_args.create_players(g)
 
-arena = Arena.Arena(player1, player2, g, v)
-print(arena.playGames(CONFIG.pit_args.num_games, verbose=CONFIG.visibility))
+arena = Arena.Arena(player1, player2, g, CONFIG.learn_args, v)
+results = arena.playRecordGames(CONFIG.pit_args.num_games, verbose=CONFIG.visibility)
+print("Final arena ranking: ([1]=>%d, [-1]=>%d, [0]=>%d)" % results)

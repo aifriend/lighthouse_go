@@ -39,15 +39,13 @@ class OneHotEncoder(Encoder):
         self.ENERGY_IDX_INC_OH = 7  # island energy to be played 7 bit - 00(not energy), 1100100(100 energy units)
         self.P_NAME_IDX_INC_OH = 2  # playerName 2 bit - 00(neutral), 01(1) or 10(-1) or 11(both)
         self.A_TYPE_IDX_INC_OH = 2  # either work or lighthouse - 00(work), 01(lighthouse) or 11(both)
-        self.PL_SCORE_W1_IDX_INC_OH = 20  # player1 score 20 bit - inf?
-        self.PL_SCORE_W2_IDX_INC_OH = 20  # player2 score 20 bit - inf?
-        self.PL_ENERGY_W1_IDX_INC_OH = 12  # player1 energy 12 bit
-        self.PL_ENERGY_W2_IDX_INC_OH = 12  # player2 energy 12 bit
-        self.LH_ENERGY_IDX_INC_OH = 12  # lighthouse energy
+        self.PL_SCORE_W_IDX_INC_OH = 20  # player1 score 20 bit - inf?
+        self.PL_ENERGY_W_IDX_INC_OH = 14  # player1 energy
+        self.LH_ENERGY_IDX_INC_OH = 14  # lighthouse energy
         self.LH_OWNER_IDX_INC_OH = 2  # lighthouse owner 2 bit - 00(neutral), 01(1) or 10(-1)
         self.LH_KEY_IDX_INC_OH = 2  # player has lighthouse key
         self.LH_CONN_IDX_INC_OH = 5  # lighthouse laser connections with other lhs
-        self.LH_TRI_IDX_INC_OH = 3  # polygon areas between three lasers
+        self.LH_TRI_IDX_INC_OH = 11  # polygon areas between three lasers
         self.TIME_IDX_INC_OH = 11  # 2^11 2048(za total annihilation)
 
         # builds indexes for character encoding
@@ -63,19 +61,13 @@ class OneHotEncoder(Encoder):
         self.A_TYPE_IDX_OH = self.P_NAME_IDX_MAX_OH
         self.A_TYPE_IDX_MAX_OH = self.A_TYPE_IDX_OH + self.A_TYPE_IDX_INC_OH
 
-        self.PL_SCORE_W1_IDX_OH = self.A_TYPE_IDX_MAX_OH
-        self.PL_SCORE_W1_IDX_MAX_OH = self.PL_SCORE_W1_IDX_OH + self.PL_SCORE_W1_IDX_INC_OH
+        self.PL_SCORE_W_IDX_OH = self.A_TYPE_IDX_MAX_OH
+        self.PL_SCORE_W_IDX_MAX_OH = self.PL_SCORE_W_IDX_OH + self.PL_SCORE_W_IDX_INC_OH
 
-        self.PL_SCORE_W2_IDX_OH = self.PL_SCORE_W1_IDX_MAX_OH
-        self.PL_SCORE_W2_IDX_MAX_OH = self.PL_SCORE_W2_IDX_OH + self.PL_SCORE_W2_IDX_INC_OH
+        self.PL_ENERGY_W_IDX_OH = self.PL_SCORE_W_IDX_MAX_OH
+        self.PL_ENERGY_W_IDX_MAX_OH = self.PL_ENERGY_W_IDX_OH + self.PL_ENERGY_W_IDX_INC_OH
 
-        self.PL_ENERGY_W1_IDX_OH = self.PL_SCORE_W2_IDX_MAX_OH
-        self.PL_ENERGY_W1_IDX_MAX_OH = self.PL_ENERGY_W1_IDX_OH + self.PL_ENERGY_W1_IDX_INC_OH
-
-        self.PL_ENERGY_W2_IDX_OH = self.PL_ENERGY_W1_IDX_MAX_OH
-        self.PL_ENERGY_W2_IDX_MAX_OH = self.PL_ENERGY_W2_IDX_OH + self.PL_ENERGY_W2_IDX_INC_OH
-
-        self.LH_ENERGY_IDX_OH = self.PL_ENERGY_W2_IDX_MAX_OH
+        self.LH_ENERGY_IDX_OH = self.PL_ENERGY_W_IDX_MAX_OH
         self.LH_ENERGY_IDX_MAX_OH = self.LH_ENERGY_IDX_OH + self.LH_ENERGY_IDX_INC_OH
 
         self.LH_OWNER_IDX_OH = self.LH_ENERGY_IDX_MAX_OH
@@ -122,7 +114,7 @@ class OneHotEncoder(Encoder):
         self._energy_encoder_filter(pieces)  # window energy view
 
         # filter lighthouse connections and polygons
-        self._lh_encoder_filter(pieces)  # max lh conns/tris
+        self._lh_encoder_filter(pieces)  # max lh conns/tris only for player 1 (blind play)
 
         # filter player
         self._player_encoder_filter(pieces, -1)  # remove opposite player -1 (blind play)
@@ -154,14 +146,10 @@ class OneHotEncoder(Encoder):
                     self.itb(pieces[x, y, Configuration.P_NAME_IDX], self.P_NAME_IDX_INC_OH)
                 b[x, y][self.A_TYPE_IDX_OH:self.A_TYPE_IDX_MAX_OH] = \
                     self.itb(pieces[x, y, Configuration.A_TYPE_IDX], self.A_TYPE_IDX_INC_OH)
-                b[x, y][self.PL_SCORE_W1_IDX_OH:self.PL_SCORE_W1_IDX_MAX_OH] = \
-                    self.itb(pieces[x, y, Configuration.PL_SCORE_W1_IDX], self.PL_SCORE_W1_IDX_INC_OH)
-                b[x, y][self.PL_SCORE_W2_IDX_OH:self.PL_SCORE_W2_IDX_MAX_OH] = \
-                    self.itb(pieces[x, y, Configuration.PL_SCORE_W2_IDX], self.PL_SCORE_W2_IDX_INC_OH)
-                b[x, y][self.PL_ENERGY_W1_IDX_OH:self.PL_ENERGY_W1_IDX_MAX_OH] = \
-                    self.itb(pieces[x, y, Configuration.PL_ENERGY_W1_IDX], self.PL_ENERGY_W1_IDX_INC_OH)
-                b[x, y][self.PL_ENERGY_W2_IDX_OH:self.PL_ENERGY_W2_IDX_MAX_OH] = \
-                    self.itb(pieces[x, y, Configuration.PL_ENERGY_W2_IDX], self.PL_ENERGY_W2_IDX_INC_OH)
+                b[x, y][self.PL_SCORE_W_IDX_OH:self.PL_SCORE_W_IDX_MAX_OH] = \
+                    self.itb(pieces[x, y, Configuration.PL_SCORE_W1_IDX], self.PL_SCORE_W_IDX_INC_OH)
+                b[x, y][self.PL_ENERGY_W_IDX_OH:self.PL_ENERGY_W_IDX_MAX_OH] = \
+                    self.itb(pieces[x, y, Configuration.PL_ENERGY_W1_IDX], self.PL_ENERGY_W_IDX_INC_OH)
                 b[x, y][self.LH_ENERGY_IDX_OH:self.LH_ENERGY_IDX_MAX_OH] = \
                     self.itb(pieces[x, y, Configuration.LH_ENERGY_IDX], self.LH_ENERGY_IDX_INC_OH)
                 b[x, y][self.LH_OWNER_IDX_OH:self.LH_OWNER_IDX_MAX_OH] = \
@@ -203,8 +191,8 @@ class OneHotEncoder(Encoder):
             return [int(i) for i in list('{0:08b}'.format(num))]
         if length == 11:
             return [int(i) for i in list('{0:011b}'.format(num))]
-        if length == 12:
-            return [int(i) for i in list('{0:012b}'.format(num))]
+        if length == 14:
+            return [int(i) for i in list('{0:014b}'.format(num))]
         if length == 20:
             return [int(i) for i in list('{0:020b}'.format(num))]
         raise TypeError("Length not supported:", length)

@@ -6,7 +6,7 @@ from lighthouses_aicontest.nengine.config import GameConfig
 from lighthouses_aicontest.nengine.game import Game
 from lighthouses_aicontest.nengine.view import GameView
 
-cfg_file = "lighthouses_aicontest/maps/island.txt"
+cfg_file = "maps/island.txt"
 bots = [0, 1, 2]
 DEBUG = False
 

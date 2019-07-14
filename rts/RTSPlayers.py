@@ -5,12 +5,12 @@ Human player has defined input controls for Pygame and console
 """
 import ctypes
 import os
-from math import sqrt
 from typing import List
 
 import numpy as np
 import pygame
 from lib.utils import dotdict
+from math import sqrt
 from pygame.rect import Rect
 from rts.RTSLogic import RTSLogic
 from rts.config.config import CONFIG

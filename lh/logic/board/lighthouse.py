@@ -86,7 +86,7 @@ class Lighthouse(object):
             strength -= d
         if strength:
             self._owner = player.turn
-            self._energy = strength
+            self._energy += strength
 
     def decay(self, by):
         self._energy -= by

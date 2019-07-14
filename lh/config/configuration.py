@@ -5,13 +5,13 @@ from lib.utils import dotdict
 
 class Configuration:
     # specifically choose TF cpu if needed. This will have no effect if GPU is not present
-    USE_TF_CPU = True
+    USE_TF_CPU = False
 
     # helper path so model weights are imported and exported correctly when transferring project
     PATH = os.path.dirname(os.path.realpath(__file__))
 
     # Show initial TF configuration when TF is getting initialized
-    SHOW_TENSORFLOW_GPU = False
+    SHOW_TENSORFLOW_GPU = True
 
     # Disable TF warnings
     DISABLE_TENSORFLOW_WARNING = True
@@ -23,7 +23,15 @@ class Configuration:
     VERBOSE_MODEL_FIT = 1  # 0 = silent, 1 = progress bar, 2 = one line per epoch.
 
     # Maximum number of fps Pygame will render game at. Only relevant when running with verbose > 3
-    FPS = 5
+    FPS = 100
+
+    # Endgame threshold
+    ENDGAME_THRESHOLD = 500
+
+    # Rewards
+    REWARD_LH = 1
+    REWARD_LH_LINKED = 2
+    REWARD_ENERGY = 1
 
     # ##################################
     # ########### ENCODERS #############
@@ -154,20 +162,24 @@ class Configuration:
 
     # User shortcuts that player can use using Pygame
     d_user_shortcuts = dotdict({
-        ' ': 0,  # idle
-        's': 1,  # down
+        's': 0,  # idle
+
+        'x': 1,  # down
         'w': 2,  # up
         'd': 3,  # right
         'a': 4,  # left
-        'e': 7,  # upright
-        'q': 8,  # upleft
-        'c': 5,  # downright
-        'z': 6,  # downleft
+
+        'e': 5,  # upright
+        'q': 6,  # upleft
+        'c': 7,  # downright
+        'z': 8,  # downleft
+
         '1': 9,  # attack10
         '2': 10,  # attack30
         '3': 11,  # attack60
         '4': 12,  # attack80
         '5': 13,  # attack100
+
         'h': 14,  # connect0
         'j': 15,  # connect1
         'k': 16,  # connect2
@@ -177,20 +189,24 @@ class Configuration:
 
     # Reverse dictionary for user shortcuts
     d_user_shortcuts_rev = dotdict({
-        0: ' ',  # idle
-        1: 's',  # down
+        0: 's',  # idle
+
+        1: 'x',  # down
         2: 'w',  # up
         3: 'd',  # right
         4: 'a',  # left
+
         5: 'e',  # upright
         6: 'q',  # upleft
         7: 'c',  # downright
         8: 'z',  # downleft
+
         9: '1',  # attack10
         10: '2',  # attack30
         11: '3',  # attack60
         12: '4',  # attack80
         13: '5',  # attack100
+
         14: 'h',  # connect0
         15: 'j',  # connect1
         16: 'k',  # connect2

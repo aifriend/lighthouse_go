@@ -1,6 +1,6 @@
-import math
 from typing import Any, Tuple, Optional
 
+import math
 import numpy as np
 import pygame
 
@@ -12,8 +12,8 @@ from lib.View import View
 CELL = 15
 
 PLAYERC = [
-    (0, 255, 0),  # green
     (255, 0, 0),  # red
+    (0, 255, 0),  # green
     (0, 255, 255),  # sky
     (255, 0, 255),  # pink
     (255, 127, 0),  # orange
@@ -25,7 +25,7 @@ PLAYERC = [
 class LHView(View):
     def __init__(self, game):
         self._logic = game.logic
-        self._screen_write = 0
+        self._screen_write = tuple()
         self._scale = 0
         self._fw = 0
         self._fh = 0
@@ -51,7 +51,7 @@ class LHView(View):
 
         self._scale = 2
         scree_size = width, height = 600, 640
-        self._screen_write = width, height, offset = 600, 100, 540
+        self._screen_write = width, height, offset = (600, 100, 540)
         self._fw = self._logic.board.size[1] * CELL * self._scale  # 21 -> 630
         self._fh = self._logic.board.size[0] * CELL * self._scale  # 18 -> 540
         self._nw = self._logic.board.size[1] - 1  # 20
@@ -123,15 +123,23 @@ class LHView(View):
                              (x1 * CELL + CELL / 2, y1 * CELL + CELL / 2),
                              color)
 
-        # board stats
-        logic = LHView.from_array(board)
-        i = 1
-        for player in logic.players.values():
-            p_s_msg = "(player %d): %d" % (player.turn, player.score)
-            self.message_display("Score " + p_s_msg, (5, i))
-            p_e_msg = "(player %d): %d" % (player.turn, player.energy)
-            self.message_display("Energy " + p_e_msg, (9, i))
-            i += 1
+        # show player stats
+        assert len(self._logic.board.players.values()) == 2
+        p1 = list(self._logic.board.players.values())[0]
+        p_s_msg = "(player %d): %5.2f" % (p1.turn, p1.score)
+        self.message_display("Score " + p_s_msg, (5, 1))
+        p_e_msg = "(player %d): %d" % (p1.turn, p1.energy)
+        self.message_display("Energy " + p_e_msg, (10, 1))
+        p_k_msg = "(player %d): %d" % (p1.turn, len(p1.keys))
+        self.message_display("Keys " + p_k_msg, (15, 1))
+        """"""
+        p2 = list(self._logic.board.players.values())[1]
+        p_s_msg = "(player %d): %5.2f" % (p2.turn, p2.score)
+        self.message_display("Score " + p_s_msg, (5, 2))
+        p_e_msg = "(player %d): %d" % (p2.turn, p2.energy)
+        self.message_display("Energy " + p_e_msg, (10, 2))
+        p_k_msg = "(player %d): %d" % (p2.turn, len(p2.keys))
+        self.message_display("Keys " + p_k_msg, (15, 2))
 
         # timing remaining
         time_remaining = board[0][0][Configuration.TIME_IDX]
@@ -216,10 +224,9 @@ class LHView(View):
             print("|")
         print('-' * (row * 10 + 1))
 
-    def message_display(self, text, position, text_size=16, color=(255, 255, 255)) -> None:
+    def message_display(self, text, position, text_size=12, color=(255, 255, 255)) -> None:
         """
         Display text on pygame window.
-        :param game_display: Which canvas text will be rendered upon
         :param text: string text
         :param position: coordinates on canvas where text will be displayed
         :param text_size: ...

@@ -6,7 +6,7 @@ class Player(object):
     def __init__(self, pose, turn=0):
         self._turn = turn
         self._pos = pose
-        self._score = 0
+        self._score = 0.0
         self._energy = 0
         self._keys = set()
 
@@ -87,12 +87,12 @@ class Player(object):
         pieces[self._pos[1], self._pos[0], Configuration.P_NAME_IDX] = int(round(self._turn))
 
     def pl_score_to_board(self, pieces, score=None):
-        if score and score >= 0:
+        if score and score >= 0.0:
             self._score = score
         if self._turn == 1:
-            pieces[self._pos[1], self._pos[0], Configuration.PL_SCORE_W1_IDX] = int(round(self._score))
+            pieces[self._pos[1], self._pos[0], Configuration.PL_SCORE_W1_IDX] = self._score
         elif self._turn == -1:
-            pieces[self._pos[1], self._pos[0], Configuration.PL_SCORE_W2_IDX] = int(round(self._score))
+            pieces[self._pos[1], self._pos[0], Configuration.PL_SCORE_W2_IDX] = self._score
 
     def pl_energy_to_board(self, pieces, energy=None):
         if energy and energy >= 0:
@@ -115,9 +115,9 @@ class Player(object):
 
     def board_to_pl_score(self, pieces):
         if self._turn == 1:
-            self._score = int(round(pieces[self._pos[1], self._pos[0], Configuration.PL_SCORE_W1_IDX]))
+            self._score = pieces[self._pos[1], self._pos[0], Configuration.PL_SCORE_W1_IDX]
         else:
-            self._score = int(round(pieces[self._pos[1], self._pos[0], Configuration.PL_SCORE_W2_IDX]))
+            self._score = pieces[self._pos[1], self._pos[0], Configuration.PL_SCORE_W2_IDX]
 
     def board_to_pl_energy(self, pieces):
         if self._turn == 1:

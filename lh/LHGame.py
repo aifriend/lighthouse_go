@@ -11,7 +11,8 @@ from lib.Game import Game
 class LHGame(Game):
     def __init__(self) -> None:
         super().__init__()
-        self.logic = LHLogic(CONFIG.board_file_path)
+        map_file = CONFIG.board_file_path[0] + CONFIG.board_file_path[1]
+        self.logic = LHLogic(map_file)
         self.logic.initialize()
 
     def getInitBoard(self) -> np.ndarray:
@@ -60,7 +61,7 @@ class LHGame(Game):
         pieces = self.logic.to_array(board)
 
         # get config for timeout: update timer on every tile:
-        pieces[:, :, Configuration.TIME_IDX] -= 1
+        pieces[:, :, Configuration.TIME_IDX] -= 0.5
 
         return pieces, -player_id
 
@@ -94,14 +95,18 @@ class LHGame(Game):
         # update board status
         self.logic.from_array(board)
 
-        # detect timeout
-        if board[0, 0, Configuration.TIME_IDX] < 1:
-            score_player1 = self.get_score(board, player_id)
-            score_player2 = self.get_score(board, -player_id)
-            if score_player1 == score_player2:
-                return 0.001
+        # detect score distance
+        score_player1 = self.get_score_by(board, player_id)
+        score_player2 = self.get_score_by(board, -player_id)
+        if abs(score_player1 - score_player2) > Configuration.ENDGAME_THRESHOLD:
             better_player = 1 if score_player1 > score_player2 else -1
             return better_player
+
+        # detect timeout
+        if board[0, 0, Configuration.TIME_IDX] <= 0:
+            if score_player1 == score_player2 or \
+                    abs(score_player1 - score_player2) <= Configuration.ENDGAME_THRESHOLD:
+                return 0.001
 
         # detect no valid actions
         if not self.logic.valid_moves_left(1):
@@ -167,7 +172,7 @@ class LHGame(Game):
     def stringRepresentation(self, board: np.ndarray) -> bytes:
         return board.tostring()
 
-    def get_score(self, board: np.array, turn: int) -> int:
+    def get_score_by(self, board: np.array, turn: int) -> int:
         """
         Uses an elo function that determine better player
 
@@ -180,7 +185,5 @@ class LHGame(Game):
 
         # get player
         player = self.logic.board.player_by(turn)
-        opponent = self.logic.board.player_by(-turn)
-        assert player and opponent
 
-        return player.score - opponent.score
+        return player.score

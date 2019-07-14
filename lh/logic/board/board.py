@@ -1,5 +1,4 @@
 import math
-
 import numpy as np
 
 from lh.config.configuration import Configuration
@@ -124,10 +123,10 @@ class Board(object):
                       2: (0, 1),  # up
                       3: (1, 0),  # right
                       4: (-1, 0),  # left
-                      5: (1, -1),  # upright
-                      6: (-1, -1),  # upleft
-                      7: (1, 1),  # downright
-                      8: (-1, 1)}  # downleft
+                      5: (1, 1),  # upright
+                      6: (-1, 1),  # upleft
+                      7: (1, -1),  # downright
+                      8: (-1, -1)}  # downleft
 
     # All possible attacks
     POSSIBLE_ATTACK = {9: 0.1,  # attack 10%
@@ -310,6 +309,10 @@ class Board(object):
                 energy = self._island.energy[pos] // len(players)
                 for player in players:
                     player.energy += energy
+                    if energy > Island.MAX_ENERGY / 3 / 4:
+                        player.score += Configuration.REWARD_ENERGY
+                    elif player.score > 0:
+                        player.score -= Configuration.REWARD_ENERGY
                 self._island.energy[pos] = 0
 
     def post_player_update(self, player):
@@ -318,19 +321,19 @@ class Board(object):
         if not r_player:
             return
 
-        # Evaluate board player score: lighthouses owned
+        # Score board player score: lighthouses owned
         for lh in self._lighthouses.values():
             if lh.owner is not None:
                 if lh.owner == r_player.turn:
-                    r_player.score += 2
+                    r_player.score += Configuration.REWARD_LH
 
-        # Evaluate board player score: lighthouses linked
+        # Score board player score: lighthouses linked
         for pair in self._connection.conns:
             lh = self._lighthouses[next(iter(pair))]
             if lh.owner == r_player.turn:
-                r_player.score += 2
+                r_player.score += Configuration.REWARD_LH_LINKED
 
-        # Evaluate board player score: lighthouses closed
+        # Score board player score: lighthouses closed
         for tri, cells in self._polygon.tris.items():
             lh = self._lighthouses[tri[0]]
             if lh.owner == r_player.turn:
@@ -396,7 +399,8 @@ class Board(object):
                 return action
         return None
 
-    def get_available_worker_moves(self, player, valid_moves):
+    def get_available_worker_moves(self, player):
+        valid_moves = [0] * Configuration.NUM_ACTS
         # Get possible worker movements
         for (key, _) in self.available_worker_moves(player):
             if key:
@@ -409,21 +413,26 @@ class Board(object):
         if player.pos in self._lighthouses.keys():
             if player.energy > 10:  # min energy valid for attack
                 # max energy available selected for attack
-                attack_energy = int(round(player.energy * Board.POSSIBLE_ATTACK[13]))
-                if attack_energy > Lighthouse.DECAY:
-                    yield (13, attack_energy)
-                attack_energy = int(round(player.energy * Board.POSSIBLE_ATTACK[12]))
-                if attack_energy > Lighthouse.DECAY:
-                    yield (12, attack_energy)
-                attack_energy = int(round(player.energy * Board.POSSIBLE_ATTACK[11]))
-                if attack_energy > Lighthouse.DECAY:
-                    yield (11, attack_energy)
-                attack_energy = int(round(player.energy * Board.POSSIBLE_ATTACK[10]))
-                if attack_energy > Lighthouse.DECAY:
-                    yield (10, attack_energy)
-                attack_energy = int(round(player.energy * Board.POSSIBLE_ATTACK[9]))
-                if attack_energy > Lighthouse.DECAY:
-                    yield (9, attack_energy)
+                attack_energy_100 = int(round(player.energy * Board.POSSIBLE_ATTACK[13]))
+                if attack_energy_100 > Lighthouse.DECAY:
+                    yield (13, attack_energy_100)
+                else:
+                    attack_energy_80 = int(round(player.energy * Board.POSSIBLE_ATTACK[12]))
+                    if attack_energy_80 > Lighthouse.DECAY:
+                        yield (12, attack_energy_80)
+                    else:
+                        attack_energy_60 = int(round(player.energy * Board.POSSIBLE_ATTACK[11]))
+                        if attack_energy_60 > Lighthouse.DECAY:
+                            yield (11, attack_energy_60)
+                        else:
+                            attack_energy_30 = int(round(player.energy * Board.POSSIBLE_ATTACK[10]))
+                            if attack_energy_30 > Lighthouse.DECAY:
+                                yield (10, attack_energy_30)
+                            else:
+                                attack_energy_10 = int(round(player.energy * Board.POSSIBLE_ATTACK[9]))
+                                if attack_energy_10 > Lighthouse.DECAY:
+                                    yield (9, attack_energy_10)
+
         yield (None, None)
 
     def get_available_attack_actions(self, player, move):
@@ -433,12 +442,13 @@ class Board(object):
                 return value
         return None
 
-    def get_available_attack_moves(self, player, valid_moves):
+    def get_available_attack_moves(self, player):
+        valid_attack = [0] * Configuration.NUM_ACTS
         # Get possible attack movements
         for key, _ in self.available_attack_moves(player):
             if key:
-                valid_moves[key] = 1
-        return valid_moves
+                valid_attack[key] = 1
+        return valid_attack
 
     # Connection moves
     def available_lh_connection_moves(self, player) -> (int, (int, int)):
@@ -479,12 +489,13 @@ class Board(object):
                 return dest.pos
         assert False
 
-    def get_available_lh_connection_moves(self, player, valid_moves):
+    def get_available_lh_connection_moves(self, player):
+        valid_conn = [0] * Configuration.NUM_ACTS
         # Get possible connection movements
         for (key, _) in self.available_lh_connection_moves(player):
             if key:
-                valid_moves[key] = 1
-        return valid_moves
+                valid_conn[key] = 1
+        return valid_conn
 
     def player_by(self, turn):
         for player in self._players.values():

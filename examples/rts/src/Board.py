@@ -288,7 +288,7 @@ class Board:
                                                                                                                  d_a_type[
                                                                                                                      'Hall'],
                                                                                                                  check_friendly=True) and (
-                               config.MAX_GOLD >= self[x][y][MONEY_IDX] + config.MONEY_INC)
+                           config.MAX_GOLD >= self[x][y][MONEY_IDX] + config.MONEY_INC)
 
         if act == "attack_up":
             return config.acts_enabled.attack and self._check_if_attack(x, y, x, y - 1)
