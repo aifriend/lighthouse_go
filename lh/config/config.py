@@ -4,37 +4,38 @@ from lh.config.LHConfig import LHConfig
 # CONFIG = Configuration()
 
 # ###########################   Example learning   #################################
-CONFIG = LHConfig(board_file_path=('./config/maps/', 'island.txt'),
-                  num_iters=5,  # iteration of episodes
-                  num_mcts_sims=15,  # MCTS open nodes
-                  num_eps=3,  # episode of self-playing game
-                  epochs=100,  # complete whole dataset (in batches) for nnet to learn
-                  cpuct=1.0,  # exploration MCTS parameter
-                  temp_threshold=200,
-                  timeout_player=200,
-                  arena_compare=4,
-                  num_iters_for_train_examples_history=3,
-                  update_threshold=8,
-                  load_train_examples=False,
-                  load_train_folder_file=('./temp/', 'checkpoint_train_'),
-                  load_model=False,
-                  load_model_folder_file=('./temp/', 'best.pth.tar'))
+CONFIG_LEARN = LHConfig(board_file_path=('./config/maps/', 'island.txt'),
+                        num_iters=50,  # iteration of episodes (at least 1)
+                        num_mcts_sims=5,  # MCTS open nodes
+                        num_eps=3,  # episode of self-playing game
+                        epochs=100,  # complete whole dataset (in batches) for nnet to learn
+                        cpuct=2.0,  # exploration MCTS parameter
+                        timeout=50,
+                        arena_compare=4,
+                        num_iters_for_train_examples_history=3,
+                        load_train_examples=False,
+                        load_train_folder_file=('./temp/', 'checkpoint_train_'),
+                        load_model=True,
+                        load_model_folder_file=('./temp/', 'best.pth.tar'),
+                        learn_visibility=4,
+                        endgame_threshold=False)
 
-# ###########################   Learning Pit   #################################
+# ###########################   Learning Pit nnet  ##################################
 """
-CONFIG = LHConfig(timeout_player=200,
-                  num_games=2,  # even
-                  num_iters_for_train_examples_history=3,
-                  player1_type='human',
-                  player2_type='random')
-
-CONFIG = LHConfig(timeout_player=200,
-                  num_games=2,  # even
-                  num_iters_for_train_examples_history=3,
-                  player1_type='human',
-                  player2_type='nnet',
-                  player2_config={'numMCTSSims': 5, 'cpuct': 2.0},
-                  player2_model_file='best.pth.tar')
+CONFIG_PIT = LHConfig(timeout=100,
+                      num_games=6,  # even (at least 2)
+                      player1_type='human',
+                      player2_type='nnet',  # random / nnet
+                      player2_config={'numMCTSSims': 5, 'cpuct': 1.4},
+                      player2_model_file='best.pth.tar',
+                      pit_visibility=4)
+"""
+# ##########################   Learning Pit random   ################################
+"""
+CONFIG_PIT = LHConfig(timeout=250,
+                      num_games=10,  # even
+                      player1_type='human',
+                      player2_type='random')
 """
 # ################################### Run 1 #########################################
 """
@@ -67,7 +68,6 @@ Random movement has been greatly decreased over learning period, resulting in le
 Hunting for enemy actors doesn't occur, where player would try to annihilate enemy player.
 Players mostly gather gold and construct new actors with occasional attacks.
 """
-
 # ###################### Pit with different board setup ##############################
 """
 CONFIG = Configuration(num_iters=100,

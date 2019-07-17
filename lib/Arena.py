@@ -73,7 +73,6 @@ class Arena:
 
         if verbose:
             assert self.view
-            print(" => Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.view.display(board)
 
         r = self.game.getGameEnded(board, 1)
@@ -113,8 +112,8 @@ class Arena:
             eps += 1
             eps_time.update(time.time() - end)
             end = time.time()
-            bar.suffix = 'P1/P2 ({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}' \
-                .format(eps=eps + 1, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td)
+            bar.suffix = 'P1/P2 ({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:} | RET: {ret:})' \
+                .format(eps=eps, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td, ret=game_result)
             bar.next()
 
         self.player1, self.player2 = self.player2, self.player1
@@ -131,8 +130,8 @@ class Arena:
             eps += 1
             eps_time.update(time.time() - end)
             end = time.time()
-            bar.suffix = 'P2/P1 ({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}' \
-                .format(eps=eps + 1, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td)
+            bar.suffix = 'P2/P1 ({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:} | RET: {ret:})' \
+                .format(eps=eps, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td, ret=game_result)
             bar.next()
 
         bar.finish()
@@ -152,7 +151,7 @@ class Arena:
         iteration_train_examples = deque([], maxlen=self.args.maxlenOfQueue)
 
         eps_time = AverageMeter()
-        bar = ShadyBar('Arena.playGames', max=num + 1)
+        bar = ShadyBar('Arena.playGames', max=num)
         end = time.time()
         eps = 0
         maxeps = int(num)
@@ -173,8 +172,8 @@ class Arena:
             eps += 1
             eps_time.update(time.time() - end)
             end = time.time()
-            bar.suffix = 'P1/P2 ({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}' \
-                .format(eps=eps + 1, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td)
+            bar.suffix = 'P1/P2 ({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:} | RET: {ret:})' \
+                .format(eps=eps, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td, ret=game_result)
             bar.next()
 
             iteration_train_examples += training_example
@@ -193,8 +192,8 @@ class Arena:
             eps += 1
             eps_time.update(time.time() - end)
             end = time.time()
-            bar.suffix = 'P2/P1 ({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}' \
-                .format(eps=eps + 1, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td)
+            bar.suffix = 'P2/P1 ({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:} | RET: {ret:})' \
+                .format(eps=eps, maxeps=maxeps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td, ret=game_result)
             bar.next()
 
             iteration_train_examples += training_example

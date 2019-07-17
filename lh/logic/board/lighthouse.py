@@ -40,13 +40,13 @@ class Lighthouse(object):
     def lh_owner_to_board(self, pieces, owner=None):
         if owner is not None:
             self._owner = owner
-        pieces[self._pos[1], self._pos[0], Configuration.LH_OWNER_IDX] = int(round(self._owner))
+        pieces[self._pos[1], self._pos[0], Configuration.LH_OWNER_IDX] = int(self._owner)
 
     def board_to_lh_energy(self, pieces):
         self._energy = int(round(pieces[self._pos[1], self._pos[0], Configuration.LH_ENERGY_IDX]))
 
     def board_to_lh_owner(self, pieces):
-        self._owner = int(round(pieces[self._pos[1], self._pos[0], Configuration.LH_OWNER_IDX]))
+        self._owner = int(pieces[self._pos[1], self._pos[0], Configuration.LH_OWNER_IDX])
 
     @staticmethod
     def clear_board(pieces):
@@ -109,6 +109,6 @@ class Lighthouse(object):
         for y in range(row):
             for x in range(col):
                 if pieces[y, x, Configuration.LH_OWNER_IDX] == player:
-                    lh_owned.append((y, x))
+                    lh_owned.append((x, y))
 
         return lh_owned

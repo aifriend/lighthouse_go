@@ -7,7 +7,6 @@ import os
 
 import numpy as np
 
-from lh.config.config import CONFIG
 from lh.config.configuration import Configuration
 from lh.keras.LHNNet import LHNNet
 from lib.NeuralNet import NeuralNet
@@ -15,16 +14,17 @@ from lib.NeuralNet import NeuralNet
 
 class NNetWrapper(NeuralNet):
 
-    def __init__(self, game, encoder=None):
+    def __init__(self, game, config):
         """
         Creates nnet wrapper with game configuration and encoder
-        :param game: game configuration
-        :param encoder: encoded that will be used for training and later predictions
+        :param game: game
+        :param config: configuration
         """
         # default
         super().__init__()
-        self.encoder = encoder or CONFIG.nnet_args.encoder
-        self.nnet = LHNNet(game, self.encoder)
+        self.config = config
+        self.encoder = self.config.nnet_args.encoder  # encoded that will be used for training and later predictions
+        self.nnet = LHNNet(game, self.encoder, self.config)
 
     def train(self, examples):
         """
@@ -41,8 +41,8 @@ class NNetWrapper(NeuralNet):
         """
         input_boards = self.encoder.encode_multiple(input_boards)
 
-        self.nnet.model.fit(x=input_boards, y=[target_pis, target_vs], batch_size=CONFIG.nnet_args.batch_size,
-                            epochs=CONFIG.nnet_args.epochs, verbose=Configuration.VERBOSE_MODEL_FIT)
+        self.nnet.model.fit(x=input_boards, y=[target_pis, target_vs], batch_size=self.config.nnet_args.batch_size,
+                            epochs=self.config.nnet_args.epochs, verbose=Configuration.VERBOSE_MODEL_FIT)
 
     def predict(self, board, player=None):
         """

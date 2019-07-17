@@ -103,37 +103,6 @@ class LHLogic:
         # No action found to be returned
         assert False
 
-    def _get_valid_moves(self, turn):
-        # get player
-        player = self._board.player_by(turn)
-        if not player:
-            return None
-
-        # get valid moves
-        moves = []
-
-        # select valid moves
-        for row in range(self._board.size[0]):
-            for col in range(self._board.size[1]):
-                if (col, row) == player.pos:
-                    valid_moves = [0] * Configuration.NUM_ACTS
-
-                    # AVAILABLE ACTION - WK - MOVE
-                    self._board.get_available_worker_moves(player, valid_moves)
-
-                    # AVAILABLE ACTION - WK - ATTACK
-                    self._board.get_available_attack_moves(player, valid_moves)
-
-                    # AVAILABLE ACTION - LH - CONN
-                    self._board.get_available_lh_connection_moves(player, valid_moves)
-
-                    moves.extend(valid_moves)
-                else:
-                    moves.extend([0] * Configuration.NUM_ACTS)
-
-        # return the generated move list
-        return moves
-
     def get_valid_moves(self, turn):
         # get player
         player = self._board.player_by(turn)

@@ -3,15 +3,15 @@ from typing import Tuple
 import numpy as np
 
 from lh.LHLogic import LHLogic
-from lh.config.config import CONFIG
 from lh.config.configuration import Configuration
 from lib.Game import Game
 
 
 class LHGame(Game):
-    def __init__(self) -> None:
+    def __init__(self, config) -> None:
         super().__init__()
-        map_file = CONFIG.board_file_path[0] + CONFIG.board_file_path[1]
+        self.config = config
+        map_file = self.config.board_file_path[0] + self.config.board_file_path[1]
         self.logic = LHLogic(map_file)
         self.logic.initialize()
 
@@ -25,7 +25,7 @@ class LHGame(Game):
         pieces = np.zeros((self.logic.board.size[0], self.logic.board.size[1], Configuration.NUM_ENCODERS))
 
         # remaining time is stored in all squares
-        pieces[:, :, Configuration.TIME_IDX] = CONFIG.timeout
+        pieces[:, :, Configuration.TIME_IDX] = self.config.timeout
 
         # get pieces from actual board state
         pieces = self.logic.to_array(pieces)
@@ -105,7 +105,8 @@ class LHGame(Game):
         # detect timeout
         if board[0, 0, Configuration.TIME_IDX] <= 0:
             if score_player1 == score_player2 or \
-                    abs(score_player1 - score_player2) <= Configuration.ENDGAME_THRESHOLD:
+                    (self.config.endgame_threshold and
+                     abs(score_player1 - score_player2) <= Configuration.ENDGAME_THRESHOLD):
                 return 0.001
 
         # detect no valid actions
@@ -141,6 +142,9 @@ class LHGame(Game):
         return n_board
 
     def getSymmetries(self, board: np.ndarray, pi):
+        return [(board, pi)]
+
+    def _getSymmetries(self, board: np.ndarray, pi):
         row, col = self.logic.board.size
         assert (len(pi) == row * col * Configuration.NUM_ACTS)
         pi_board = np.reshape(pi, (row, col, Configuration.NUM_ACTS))

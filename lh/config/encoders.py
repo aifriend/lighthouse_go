@@ -35,24 +35,18 @@ class OneHotEncoder(Encoder):
         """
         Defines encoding indexes - you may change them as you would like, but do not reduce them below their actual encoders.
         """
-        self.ISLAND_IDX_INC_OH = 2  # island to be played 2 bit - 00(not playable), 01(island playable) or 10(lh)
         self.ENERGY_IDX_INC_OH = 7  # island energy to be played 7 bit - 00(not energy), 1100100(100 energy units)
         self.P_NAME_IDX_INC_OH = 2  # playerName 2 bit - 00(neutral), 01(1) or 10(-1) or 11(both)
         self.A_TYPE_IDX_INC_OH = 2  # either work or lighthouse - 00(work), 01(lighthouse) or 11(both)
-        self.PL_SCORE_W_IDX_INC_OH = 20  # player1 score 20 bit - inf?
-        self.PL_ENERGY_W_IDX_INC_OH = 14  # player1 energy
-        self.LH_ENERGY_IDX_INC_OH = 14  # lighthouse energy
+        self.PL_ENERGY_W_IDX_INC_OH = 13  # player1 energy
+        self.LH_ENERGY_IDX_INC_OH = 13  # lighthouse energy
         self.LH_OWNER_IDX_INC_OH = 2  # lighthouse owner 2 bit - 00(neutral), 01(1) or 10(-1)
         self.LH_KEY_IDX_INC_OH = 2  # player has lighthouse key
         self.LH_CONN_IDX_INC_OH = 5  # lighthouse laser connections with other lhs
-        self.LH_TRI_IDX_INC_OH = 11  # polygon areas between three lasers
-        self.TIME_IDX_INC_OH = 11  # 2^11 2048(za total annihilation)
+        self.LH_TRI_IDX_INC_OH = 1  # polygon cell between three lasers
 
         # builds indexes for character encoding
-        self.ISLAND_IDX_OH = 0
-        self.ISLAND_IDX_MAX_OH = self.ISLAND_IDX_INC_OH
-
-        self.ENERGY_IDX_OH = self.ISLAND_IDX_MAX_OH
+        self.ENERGY_IDX_OH = 0
         self.ENERGY_IDX_MAX_OH = self.ENERGY_IDX_OH + self.ENERGY_IDX_INC_OH
 
         self.P_NAME_IDX_OH = self.ENERGY_IDX_MAX_OH
@@ -61,10 +55,7 @@ class OneHotEncoder(Encoder):
         self.A_TYPE_IDX_OH = self.P_NAME_IDX_MAX_OH
         self.A_TYPE_IDX_MAX_OH = self.A_TYPE_IDX_OH + self.A_TYPE_IDX_INC_OH
 
-        self.PL_SCORE_W_IDX_OH = self.A_TYPE_IDX_MAX_OH
-        self.PL_SCORE_W_IDX_MAX_OH = self.PL_SCORE_W_IDX_OH + self.PL_SCORE_W_IDX_INC_OH
-
-        self.PL_ENERGY_W_IDX_OH = self.PL_SCORE_W_IDX_MAX_OH
+        self.PL_ENERGY_W_IDX_OH = self.A_TYPE_IDX_MAX_OH
         self.PL_ENERGY_W_IDX_MAX_OH = self.PL_ENERGY_W_IDX_OH + self.PL_ENERGY_W_IDX_INC_OH
 
         self.LH_ENERGY_IDX_OH = self.PL_ENERGY_W_IDX_MAX_OH
@@ -82,10 +73,7 @@ class OneHotEncoder(Encoder):
         self.LH_TRI_IDX_OH = self.LH_CONN_IDX_MAX_OH
         self.LH_TRI_IDX_MAX_OH = self.LH_TRI_IDX_OH + self.LH_TRI_IDX_INC_OH
 
-        self.TIME_IDX_OH = self.LH_TRI_IDX_MAX_OH
-        self.TIME_IDX_MAX_OH = self.TIME_IDX_OH + self.TIME_IDX_INC_OH
-
-        self.NUM_ENCODERS = self.TIME_IDX_MAX_OH
+        self.NUM_ENCODERS = self.LH_TRI_IDX_MAX_OH
 
     def encode_multiple(self, boards: np.ndarray) -> np.ndarray:
         """
@@ -117,7 +105,7 @@ class OneHotEncoder(Encoder):
         self._lh_encoder_filter(pieces)  # max lh conns/tris only for player 1 (blind play)
 
         # filter player
-        self._player_encoder_filter(pieces, -1)  # remove opposite player -1 (blind play)
+        self._player_encoder_filter(pieces, 1)  # only player 1 (blind play)
 
         b = np.zeros((row, col, self.NUM_ENCODERS))
         for y in range(col):
@@ -128,8 +116,6 @@ class OneHotEncoder(Encoder):
                     lh_key = 1
                 elif pieces[x, y, Configuration.LH_KEY_IDX] == -1:
                     lh_key = 2
-                elif pieces[x, y, Configuration.LH_KEY_IDX] == 3:
-                    lh_key = 3
 
                 # lighthouse owner from -1 to 2
                 lh_owner = 0
@@ -138,16 +124,12 @@ class OneHotEncoder(Encoder):
                 elif pieces[x, y, Configuration.LH_OWNER_IDX] == -1:
                     lh_owner = 2
 
-                b[x, y][self.ISLAND_IDX_OH:self.ISLAND_IDX_MAX_OH] = \
-                    self.itb(pieces[x, y, Configuration.ISLAND_IDX], self.ISLAND_IDX_INC_OH)
                 b[x, y][self.ENERGY_IDX_OH:self.ENERGY_IDX_MAX_OH] = \
                     self.itb(pieces[x, y, Configuration.ENERGY_IDX], self.ENERGY_IDX_INC_OH)
                 b[x, y][self.P_NAME_IDX_OH:self.P_NAME_IDX_MAX_OH] = \
                     self.itb(pieces[x, y, Configuration.P_NAME_IDX], self.P_NAME_IDX_INC_OH)
                 b[x, y][self.A_TYPE_IDX_OH:self.A_TYPE_IDX_MAX_OH] = \
                     self.itb(pieces[x, y, Configuration.A_TYPE_IDX], self.A_TYPE_IDX_INC_OH)
-                b[x, y][self.PL_SCORE_W_IDX_OH:self.PL_SCORE_W_IDX_MAX_OH] = \
-                    self.itb(pieces[x, y, Configuration.PL_SCORE_W1_IDX], self.PL_SCORE_W_IDX_INC_OH)
                 b[x, y][self.PL_ENERGY_W_IDX_OH:self.PL_ENERGY_W_IDX_MAX_OH] = \
                     self.itb(pieces[x, y, Configuration.PL_ENERGY_W1_IDX], self.PL_ENERGY_W_IDX_INC_OH)
                 b[x, y][self.LH_ENERGY_IDX_OH:self.LH_ENERGY_IDX_MAX_OH] = \
@@ -160,8 +142,6 @@ class OneHotEncoder(Encoder):
                     self.itb(pieces[x, y, Configuration.LH_CONN_IDX], self.LH_CONN_IDX_INC_OH)
                 b[x, y][self.LH_TRI_IDX_OH:self.LH_TRI_IDX_MAX_OH] = \
                     self.itb(pieces[x, y, Configuration.LH_TRI_IDX], self.LH_TRI_IDX_INC_OH)
-                b[x, y][self.TIME_IDX_OH:self.TIME_IDX_MAX_OH] = \
-                    self.itb(pieces[x, y, Configuration.TIME_IDX], self.TIME_IDX_INC_OH)
 
         return b
 
@@ -179,22 +159,18 @@ class OneHotEncoder(Encoder):
             return [int(i) for i in list('{0:01b}'.format(num))]
         if length == 2:
             return [int(i) for i in list('{0:02b}'.format(num))]
-        if length == 3:
-            return [int(i) for i in list('{0:03b}'.format(num))]
-        if length == 4:
-            return [int(i) for i in list('{0:04b}'.format(num))]
         if length == 5:
             return [int(i) for i in list('{0:05b}'.format(num))]
         if length == 7:
             return [int(i) for i in list('{0:07b}'.format(num))]
         if length == 8:
             return [int(i) for i in list('{0:08b}'.format(num))]
-        if length == 11:
-            return [int(i) for i in list('{0:011b}'.format(num))]
-        if length == 14:
-            return [int(i) for i in list('{0:014b}'.format(num))]
-        if length == 20:
-            return [int(i) for i in list('{0:020b}'.format(num))]
+        if length == 9:
+            return [int(i) for i in list('{0:09b}'.format(num))]
+        if length == 10:
+            return [int(i) for i in list('{0:010b}'.format(num))]
+        if length == 13:
+            return [int(i) for i in list('{0:013b}'.format(num))]
         raise TypeError("Length not supported:", length)
 
     @staticmethod
@@ -211,18 +187,17 @@ class OneHotEncoder(Encoder):
     @staticmethod
     def _lh_encoder_filter(pieces) -> None:
         from lh.logic.board.board import Connection, Polygon
-
-        row, col, enc = pieces.shape
-        for y in range(col):
-            for x in range(row):
-                if pieces[x][y][Configuration.P_NAME_IDX] == 1:  # only connections & polys for player 1
-                    Connection.encode_conns(pieces, 1)
-                    Polygon.encode_tris(pieces, 1)
+        Connection.encode_conns(pieces, 1)
+        Polygon.encode_tris(pieces, 1)
 
     @staticmethod
     def _player_encoder_filter(pieces, player_id):
         row, col, enc = pieces.shape
         for y in range(col):
             for x in range(row):
-                if pieces[x][y][Configuration.P_NAME_IDX] == player_id:
+                # remove opponent
+                if pieces[x][y][Configuration.P_NAME_IDX] == -player_id:
                     pieces[x][y][:] = 0
+                # encode worker type
+                if pieces[x][y][Configuration.P_NAME_IDX] == player_id:
+                    pieces[x][y][Configuration.A_TYPE_IDX] = Configuration.d_a_type["Worker"]

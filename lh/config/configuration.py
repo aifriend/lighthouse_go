@@ -26,12 +26,12 @@ class Configuration:
     FPS = 100
 
     # Endgame threshold
-    ENDGAME_THRESHOLD = 500
+    ENDGAME_THRESHOLD = 350
 
     # Rewards
-    REWARD_LH = 1
+    REWARD_LH = 2
     REWARD_LH_LINKED = 2
-    REWARD_ENERGY = 1
+    REWARD_LH_CELL = 1
 
     # ##################################
     # ########### ENCODERS #############
@@ -42,18 +42,18 @@ class Configuration:
 
     # Setting indexes to each encoder
     ISLAND_IDX = 0
-    ENERGY_IDX = 1
-    P_NAME_IDX = 2
-    A_TYPE_IDX = 3
+    ENERGY_IDX = 1  # (*nnet)
+    P_NAME_IDX = 2  # (*nnet)
+    A_TYPE_IDX = 3  # (*nnet)
     PL_SCORE_W1_IDX = 4
     PL_SCORE_W2_IDX = 5
-    PL_ENERGY_W1_IDX = 6
+    PL_ENERGY_W1_IDX = 6  # (*nnet)
     PL_ENERGY_W2_IDX = 7
-    LH_ENERGY_IDX = 8
-    LH_OWNER_IDX = 9
-    LH_KEY_IDX = 10
-    LH_CONN_IDX = 11
-    LH_TRI_IDX = 12
+    LH_ENERGY_IDX = 8  # (*nnet)
+    LH_OWNER_IDX = 9  # (*nnet)
+    LH_KEY_IDX = 10  # (*nnet)
+    LH_CONN_IDX = 11  # (*nnet)
+    LH_TRI_IDX = 12  # (*nnet)
     TIME_IDX = 13
 
     # Connections and polygons
@@ -75,7 +75,7 @@ class Configuration:
 
     # Dictionary for actors
     d_a_type = dotdict({
-        'Work': 1,
+        'Worker': 1,
         'Lighthouse': 2
     })
 

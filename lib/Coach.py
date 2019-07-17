@@ -22,15 +22,15 @@ class Coach:
     def __init__(self, game, nnet, args, view=None):
         self.game = game
         self.nnet = nnet
-        self.pnet = self.nnet.__class__(self.game)  # the competitor network
-        self.args = args
+        self.pnet = self.nnet.__class__(self.game, args)  # the competitor network
+        self.args = args.learn_args
         self.mcts = MCTS(self.game, self.nnet, self.args)
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
         self.curPlayer = 1
         self.view = view
 
-    def executeEpisode(self, numEps=-1):
+    def executeEpisode(self):
         """
         This function executes one episode of self-play, starting with player 1.
         As the game is played, each turn is added as a training example to
@@ -51,10 +51,6 @@ class Coach:
         self.curPlayer = 1
         episode_step = 0
 
-        eps_time = AverageMeter()
-        bar = ShadyBar('Episode step %s/%s' % (numEps + 1, self.args.numEps), max=self.args.game_timeout * 2)
-        end = time.time()
-
         while True:
             episode_step += 1
             canonical_board = self.game.getCanonicalForm(board, self.curPlayer)
@@ -69,18 +65,8 @@ class Coach:
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
 
             r = self.game.getGameEnded(board, self.curPlayer)
-
             if r != 0:  # game ended
-                bar.finish()
                 return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in train_examples]
-            elif numEps >= 0:
-                # bookkeeping + plot progress
-                eps_time.update(time.time() - end)
-                end = time.time()
-                bar.suffix = '({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}'.format(
-                    eps=episode_step + 1, maxeps=self.args.game_timeout * 2, et=eps_time.avg,
-                    total=bar.elapsed_td, eta=bar.eta_td)
-                bar.next()
 
     def learn(self):
         """
@@ -104,14 +90,13 @@ class Coach:
 
                 for eps in range(self.args.numEps):
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
-                    iteration_train_examples += self.executeEpisode(numEps=eps)
+                    iteration_train_examples += self.executeEpisode()
 
                     # bookkeeping + plot progress
                     eps_time.update(time.time() - end)
                     end = time.time()
                     bar.suffix = '({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}'.format(
-                        eps=eps + 1, maxeps=self.args.numEps, et=eps_time.avg,
-                        total=bar.elapsed_td, eta=bar.eta_td)
+                        eps=eps + 1, maxeps=self.args.numEps, et=eps_time.avg, total=bar.elapsed_td, eta=bar.eta_td)
                     bar.next()
 
                 bar.finish()
@@ -147,7 +132,7 @@ class Coach:
             print('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
                           lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game, self.args, self.view)
-            pwins, nwins, draws = arena.playGames(self.args.arenaCompare, verbose=4)
+            pwins, nwins, draws = arena.playGames(self.args.arenaCompare, verbose=False)
 
             print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
             if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < self.args.updateThreshold:

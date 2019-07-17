@@ -84,7 +84,7 @@ class Player(object):
     def pl_turn_to_board(self, pieces, turn=None):
         if turn is not None:
             self._turn = turn
-        pieces[self._pos[1], self._pos[0], Configuration.P_NAME_IDX] = int(round(self._turn))
+        pieces[self._pos[1], self._pos[0], Configuration.P_NAME_IDX] = int(self._turn)
 
     def pl_score_to_board(self, pieces, score=None):
         if score and score >= 0.0:
@@ -108,10 +108,10 @@ class Player(object):
             if (lh_actual_key == 1 and self._turn == -1) or (lh_actual_key == -1 and self._turn == 1):
                 pieces[key[1], key[0], Configuration.LH_KEY_IDX] = 3
             else:
-                pieces[key[1], key[0], Configuration.LH_KEY_IDX] = int(round(self._turn))
+                pieces[key[1], key[0], Configuration.LH_KEY_IDX] = int(self._turn)
 
     def board_to_pl_turn(self, pieces):
-        self._turn = int(round(pieces[self._pos[1], self._pos[0], Configuration.P_NAME_IDX]))
+        self._turn = int(pieces[self._pos[1], self._pos[0], Configuration.P_NAME_IDX])
 
     def board_to_pl_score(self, pieces):
         if self._turn == 1:

@@ -43,13 +43,18 @@ class Connection:
 
     @staticmethod
     def encode_conns(pieces, player_id) -> None:
-        n_conns = 0
-        player_lh_owned_pose = Lighthouse.owned_by(pieces, player=player_id)
+        l_conn = []
+        player_lh_owned = Lighthouse.owned_by(pieces, player=player_id)
         for conn in Connection.available_board_conns(pieces):
-            if next(iter(conn)) in player_lh_owned_pose:
-                n_conns += 1
-        pieces[:, :, Configuration.LH_CONN_IDX] = 0
-        pieces[0][0][Configuration.LH_CONN_IDX] = n_conns
+            (cx0, cy0), (cx1, cy1) = conn
+            if (cx0, cy0) in player_lh_owned or (cx1, cy1) in player_lh_owned:
+                l_conn.extend(conn)
+
+        # add lh connection
+        if len(l_conn) > 0:
+            pieces[:, :, Configuration.LH_CONN_IDX] = 0
+            for lh in l_conn:
+                pieces[int(lh[1])][int(lh[0])][Configuration.LH_CONN_IDX] = 1
 
     def close_conn(self, pos):
         self._conns = set(i for i in self._conns if pos not in i)
@@ -98,13 +103,20 @@ class Polygon:
 
     @staticmethod
     def encode_tris(pieces, player_id) -> None:
-        n_cell = 0
-        player_lh_owned_pose = Lighthouse.owned_by(pieces, player=player_id)
-        for key, ctris in Polygon.available_board_tris(pieces):
-            if next(iter(key)) in player_lh_owned_pose:
-                n_cell += ctris
+        l_cell = list()
+        row, col, enc = pieces.shape
+        island = Island.from_array(pieces)
+        player_lh_owned = Lighthouse.owned_by(pieces, player=player_id)
+        for key, c_tris in Polygon.available_board_tris(pieces):
+            if key[0] in player_lh_owned or key[1] in player_lh_owned or key[2] in player_lh_owned:
+                owned_cell = [(j[0], j[1] - row) for j in render(key) if island[j]]
+                l_cell.extend(owned_cell)
+
+        # add cell
         pieces[:, :, Configuration.LH_TRI_IDX] = 0
-        pieces[0][0][Configuration.LH_TRI_IDX] = n_cell
+        if len(l_cell) > 0:
+            for cell in l_cell:
+                pieces[int(cell[1])][int(cell[0])][Configuration.LH_TRI_IDX] = 1
 
     def close_tri(self, pos):
         self._tris = dict(i for i in self._tris.items() if pos not in i[0])
@@ -309,10 +321,6 @@ class Board(object):
                 energy = self._island.energy[pos] // len(players)
                 for player in players:
                     player.energy += energy
-                    if energy > Island.MAX_ENERGY / 3 / 4:
-                        player.score += Configuration.REWARD_ENERGY
-                    elif player.score > 0:
-                        player.score -= Configuration.REWARD_ENERGY
                 self._island.energy[pos] = 0
 
     def post_player_update(self, player):
@@ -337,7 +345,7 @@ class Board(object):
         for tri, cells in self._polygon.tris.items():
             lh = self._lighthouses[tri[0]]
             if lh.owner == r_player.turn:
-                r_player.score += cells
+                r_player.score += cells * Configuration.REWARD_LH_CELL
 
     def connect(self, player, dest_pos):
         if player.pos not in self._lighthouses.keys():

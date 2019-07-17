@@ -34,10 +34,10 @@ def render(points):
     v0, v1, v2 = points
     if orient2d(v0, v1, v2) < 0:
         v0, v1 = v1, v0
-    x0 = min(v0[0], v1[0], v2[0])
-    x1 = max(v0[0], v1[0], v2[0])
-    y0 = min(v0[1], v1[1], v2[1])
-    y1 = max(v0[1], v1[1], v2[1])
+    x0 = int(min(v0[0], v1[0], v2[0]))
+    x1 = int(max(v0[0], v1[0], v2[0]))
+    y0 = int(min(v0[1], v1[1], v2[1]))
+    y1 = int(max(v0[1], v1[1], v2[1]))
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
             p = x, y

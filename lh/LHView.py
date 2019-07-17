@@ -4,7 +4,6 @@ import math
 import numpy as np
 import pygame
 
-from lh.config.config import CONFIG
 from lh.config.configuration import Configuration
 from lh.logic.board.board import Board
 from lib.View import View
@@ -23,7 +22,7 @@ PLAYERC = [
 
 
 class LHView(View):
-    def __init__(self, game):
+    def __init__(self, game, config):
         self._logic = game.logic
         self._screen_write = tuple()
         self._scale = 0
@@ -34,6 +33,7 @@ class LHView(View):
         self._screen = None
         self._arena = None
         self._clock = None
+        self.config = config
 
     @property
     def scale(self):
@@ -46,7 +46,7 @@ class LHView(View):
         return logic
 
     def initView(self, board) -> Optional[Tuple[Any, Any, Any]]:
-        if not CONFIG.visibility:
+        if not self.config.visibility:
             return
 
         self._scale = 2
@@ -57,7 +57,7 @@ class LHView(View):
         self._nw = self._logic.board.size[1] - 1  # 20
         self._nh = self._logic.board.size[0] - 1  # 17
 
-        if CONFIG.visibility > 3:
+        if self.config.visibility > 3:
             pygame.init()
 
             # screen
@@ -80,10 +80,10 @@ class LHView(View):
         :param board: game state
         :return: /
         """
-        if not CONFIG.visibility:
+        if not self.config.visibility:
             return
 
-        if CONFIG.visibility > 3 and \
+        if self.config.visibility > 3 and \
                 not (self._arena is None) and \
                 not (self._screen is None) and \
                 not (self._clock is None):

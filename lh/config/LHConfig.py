@@ -84,7 +84,8 @@ class LHConfig:
                      player2_config,
                      player1_model_file,
                      player2_model_file,
-                     num_games):
+                     num_games,
+                     args):
 
             self.player1_type = player1_type
             self.player2_type = player2_type
@@ -93,6 +94,7 @@ class LHConfig:
             self.player1_config = player1_config or {'numMCTSSims': 2, 'cpuct': 1.0}
             self.player2_config = player2_config or {'numMCTSSims': 2, 'cpuct': 1.0}
             self.num_games = num_games
+            self.args = args
 
         def create_players(self, game):
             return self._create_player(game, self.player1_type, self.player1_config, self.player1_model_file), \
@@ -109,13 +111,13 @@ class LHConfig:
                 if player_config is None:
                     print("Invalid pit configuration. Returning")
                     exit(1)
-                return self._PitNNetPlayer(game, player_config, player_model_file).play
+                return self._PitNNetPlayer(game, player_config, player_model_file, self.args).play
             if player_type == 'random':
-                return RandomLHPlayer(game).play
+                return RandomLHPlayer(game, self).play
             if player_type == 'greedy':
-                return GreedyLHPlayer(game).play
+                return GreedyLHPlayer(game, self).play
             if player_type == 'human':
-                return HumanLHPlayer(game).play
+                return HumanLHPlayer(game, self).play
             print("Invalid player type. Returning")
             exit(1)
 
@@ -123,11 +125,12 @@ class LHConfig:
             def __init__(self,
                          g,
                          player_config,
-                         player_model_file):
+                         player_model_file,
+                         args):
                 from lh.keras.NNet import NNetWrapper as NNet
                 from lib.MCTS import MCTS
 
-                n1 = NNet(g, OneHotEncoder())
+                n1 = NNet(g, args)
                 n1.load_checkpoint('./temp/', player_model_file)
                 args1 = dotdict(player_config or {'numMCTSSims': 2, 'cpuct': 1.0})
                 mcts1 = MCTS(g, n1, args1)
@@ -168,12 +171,12 @@ class LHConfig:
 
             self.save_train_examples = save_train_examples
             self.load_train_examples = load_train_examples
-            self.game_timeout = timeout
+            self.timeout = timeout
 
     def __init__(self,
                  learn_visibility=4,
                  pit_visibility=4,
-                 timeout_player=200,
+                 timeout=200,
 
                  initial_energy_player1: int = 0,
                  damage_player1: int = 0,
@@ -188,7 +191,7 @@ class LHConfig:
                  num_iters: int = 4,
                  num_eps: int = 4,
                  temp_threshold: int = 10,
-                 update_threshold: float = 0.7,
+                 update_threshold: float = 0.5,
                  maxlen_of_queue: int = 6400,
                  num_mcts_sims: int = 10,
                  arena_compare: int = 10,
@@ -208,6 +211,7 @@ class LHConfig:
                  player1_config: dict = None,
                  player2_config: dict = None,
                  num_games: int = 4,
+                 endgame_threshold: bool = False,
 
                  lr: float = 0.01,
                  dropout: float = 0.3,
@@ -219,7 +223,7 @@ class LHConfig:
         """
         :param learn_visibility: How much console should output while running learn. If visibility.verbose > 3, Pygame is shown
         :param pit_visibility: How much console should output while running pit. If visibility.verbose > 3, Pygame is shown
-        :param timeout_player: After what time game will timeout
+        :param timeout: After what time game will timeout
         :param initial_energy_player1: How much initial energy should player have
         :param damage_player1: How much damage is inflicted upon action 'attack' on other actor
         :param acts_enabled_player1: dictionary of which actions are enabled for player. See its default values to override.
@@ -268,19 +272,20 @@ class LHConfig:
         self.visibility = 4
         self._pit_visibility = pit_visibility
         self._learn_visibility = learn_visibility
-        self.timeout = timeout_player
+        self.timeout = timeout
+        self.endgame_threshold = endgame_threshold
 
         self.player1_config = self._GameConfig(
             initial_energy=initial_energy_player1,
             damage=damage_player1,
             acts_enabled=acts_enabled_player1,
-            timeout=timeout_player)
+            timeout=timeout)
 
         self.player2_config = self._GameConfig(
             initial_energy=initial_energy_player2,
             damage=damage_player2,
             acts_enabled=acts_enabled_player2,
-            timeout=timeout_player)
+            timeout=timeout)
 
         self.learn_args = self._LearnArgs(
             num_iters=num_iters,
@@ -298,17 +303,7 @@ class LHConfig:
             num_iters_for_train_examples_history=num_iters_for_train_examples_history,
             save_train_examples=save_train_examples,
             load_train_examples=load_train_examples,
-            timeout=timeout_player)
-
-        self.pit_args = self._PitArgs(
-            player1_type=player1_type,
-            player2_type=player2_type,
-            player1_config=player1_config,
-            player2_config=player2_config,
-            player1_model_file=player1_model_file,
-            player2_model_file=player2_model_file,
-            num_games=num_games
-        )
+            timeout=timeout)
 
         self.nnet_args = self._NNetArgs(
             lr=lr,
@@ -317,6 +312,17 @@ class LHConfig:
             batch_size=batch_size,
             cuda=cuda,
             num_channels=num_channels
+        )
+
+        self.pit_args = self._PitArgs(
+            player1_type=player1_type,
+            player2_type=player2_type,
+            player1_config=player1_config,
+            player2_config=player2_config,
+            player1_model_file=player1_model_file,
+            player2_model_file=player2_model_file,
+            num_games=num_games,
+            args=self
         )
 
     def set_runner(self, runner: str):

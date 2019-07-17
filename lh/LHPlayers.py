@@ -8,13 +8,13 @@ import sys
 import numpy as np
 import pygame
 
-from lh.config.config import CONFIG
 from lh.config.configuration import Configuration
 
 
 class RandomLHPlayer:
-    def __init__(self, game):
+    def __init__(self, game, config):
         self.game = game
+        self.config = config
 
     def play(self, board):
         print("RandomLHPlayer")
@@ -24,16 +24,13 @@ class RandomLHPlayer:
             # select random action on present state
             action = np.random.randint(self.game.getActionSize())
 
-        y, x, action_index = np.unravel_index(action, [board.shape[0], board.shape[1], Configuration.NUM_ACTS])
-        print("RP > returned act: Col(%s) Row(%s) Action(%s) Index(%r:%r)" % (
-            x, y, Configuration.ACTS_REV[action_index], action, action_index))
-
         return action
 
 
 class GreedyLHPlayer:
-    def __init__(self, game):
+    def __init__(self, game, config):
         self.game = game
+        self.config = config
 
     def play(self, board):
         valid = self.game.getValidMoves(board, 1)
@@ -51,16 +48,14 @@ class GreedyLHPlayer:
         # select best action on present state
         candidates.sort()
         action = candidates[0][1]
-        y, x, action_index = np.unravel_index(action, [board.shape[0], board.shape[1], Configuration.NUM_ACTS])
-        print("GP > > returned act: Col(%s) Row(%s) Action(%s) Index(%r:%r)" % (
-            x, y, Configuration.ACTS_REV[action_index], action, action_index))
 
         return action
 
 
 class HumanLHPlayer:
-    def __init__(self, game) -> None:
+    def __init__(self, game, config) -> None:
         self.game = game
+        self.config = config
 
     def play(self, board: np.ndarray):
         print("HumanLHPlayer")
@@ -68,7 +63,7 @@ class HumanLHPlayer:
         valid = self.game.getValidMoves(board, 1)
         valid_pose = self._display_valid_moves(board, valid)
         while True:
-            if CONFIG.visibility > 3:
+            if self.config.args.visibility > 3:
                 a = HumanLHPlayer._manage_input()
                 action_index = a
             else:
@@ -88,9 +83,6 @@ class HumanLHPlayer:
             else:
                 print('This action is invalid!')
                 self._display_valid_moves(board, valid)
-
-        print("HP > returned act: Col(%s) Row(%s) Action(%s) Index(%r:%r)" % (
-            tup[0], tup[1], Configuration.ACTS_REV[tup[2]], a, action_index))
 
         return a
 
