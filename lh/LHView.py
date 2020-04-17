@@ -1,6 +1,6 @@
+import math
 from typing import Any, Tuple, Optional
 
-import math
 import numpy as np
 import pygame
 

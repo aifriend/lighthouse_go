@@ -34,9 +34,9 @@ class LHNNet:
         self.num_encoders = encoder.num_encoders
         self.action_size = game.getActionSize()
 
-        self.model = self._h4()
+        self.model = self._build()
 
-    def _h4(self):
+    def _build(self):
         # Neural Net
         input_boards = Input(
             shape=(self.board_x, self.board_y, self.num_encoders))  # s: batch_size x board_x x board_y x num_encoders

@@ -68,6 +68,8 @@ class Coach:
             if r != 0:  # game ended
                 return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in train_examples]
 
+            print("%d|" % episode_step, end="")
+
     def learn(self):
         """
         Performs numIters iterations with numEps episodes of self-play in each
@@ -135,7 +137,7 @@ class Coach:
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare, verbose=False)
 
             print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-            if pwins + nwins > 0 and float(nwins) / (pwins + nwins) < self.args.updateThreshold:
+            if pwins + nwins == 0 or (pwins + nwins > 0 and float(nwins) / (pwins + nwins) < self.args.updateThreshold):
                 print('REJECTING NEW MODEL')
                 self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             else:

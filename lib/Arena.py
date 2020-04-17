@@ -151,7 +151,7 @@ class Arena:
         iteration_train_examples = deque([], maxlen=self.args.maxlenOfQueue)
 
         eps_time = AverageMeter()
-        bar = ShadyBar('Arena.playGames', max=num)
+        bar = ShadyBar('Arena.record.playGames', max=num)
         end = time.time()
         eps = 0
         maxeps = int(num)

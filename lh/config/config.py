@@ -4,32 +4,43 @@ from lh.config.LHConfig import LHConfig
 # CONFIG = Configuration()
 
 # ###########################   Example learning   #################################
-CONFIG_LEARN = LHConfig(board_file_path=('./config/maps/', 'island.txt'),
-                        num_iters=50,  # iteration of episodes (at least 1)
-                        num_mcts_sims=5,  # MCTS open nodes
-                        num_eps=3,  # episode of self-playing game
+CONFIG_LEARN = LHConfig(num_iters=5,  # iteration of episodes (at least 1)
+                        num_mcts_sims=15,  # MCTS open nodes (at least 2)
+                        num_eps=5,  # episode of self-playing for training examples
+                        timeout=60,  # time-out for game to finnish
+                        cpuct=1.4,  # exploration MCTS parameter
                         epochs=100,  # complete whole dataset (in batches) for nnet to learn
-                        cpuct=2.0,  # exploration MCTS parameter
-                        timeout=50,
-                        arena_compare=4,
-                        num_iters_for_train_examples_history=3,
+                        arena_compare=6,  # even (at least 2)
+                        num_iters_for_train_examples_history=2,
+                        board_file_path=('./config/maps/', 'island.txt'),
                         load_train_examples=False,
                         load_train_folder_file=('./temp/', 'checkpoint_train_'),
                         load_model=True,
                         load_model_folder_file=('./temp/', 'best.pth.tar'),
-                        learn_visibility=4,
-                        endgame_threshold=False)
+                        learn_visibility=1,
+                        pit_visibility=1,
+                        endgame_threshold=True,
+                        update_threshold=0.5)
 
 # ###########################   Learning Pit nnet  ##################################
-"""
-CONFIG_PIT = LHConfig(timeout=100,
-                      num_games=6,  # even (at least 2)
-                      player1_type='human',
-                      player2_type='nnet',  # random / nnet
-                      player2_config={'numMCTSSims': 5, 'cpuct': 1.4},
-                      player2_model_file='best.pth.tar',
-                      pit_visibility=4)
-"""
+CONFIG_PIT_HUMAN = LHConfig(timeout=60,
+                            num_games=4,  # even (at least 2)
+                            player1_type='human',
+                            player2_type='nnet',  # random / nnet
+                            player2_config={'numMCTSSims': 15, 'cpuct': 1.0},
+                            player2_model_file='best.pth.tar',
+                            pit_visibility=4,
+                            endgame_threshold=True,
+                            update_threshold=0.5)
+
+CONFIG_PIT = LHConfig(timeout=60,
+                      num_games=100,  # even (at least 2)
+                      player1_type='go',
+                      player2_type='go',
+                      pit_visibility=4,
+                      endgame_threshold=True,
+                      update_threshold=0.5)
+
 # ##########################   Learning Pit random   ################################
 """
 CONFIG_PIT = LHConfig(timeout=250,

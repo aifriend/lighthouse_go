@@ -38,8 +38,8 @@ class OneHotEncoder(Encoder):
         self.ENERGY_IDX_INC_OH = 7  # island energy to be played 7 bit - 00(not energy), 1100100(100 energy units)
         self.P_NAME_IDX_INC_OH = 2  # playerName 2 bit - 00(neutral), 01(1) or 10(-1) or 11(both)
         self.A_TYPE_IDX_INC_OH = 2  # either work or lighthouse - 00(work), 01(lighthouse) or 11(both)
-        self.PL_ENERGY_W_IDX_INC_OH = 13  # player1 energy
-        self.LH_ENERGY_IDX_INC_OH = 13  # lighthouse energy
+        self.PL_ENERGY_W_IDX_INC_OH = 15  # player1 energy
+        self.LH_ENERGY_IDX_INC_OH = 14  # lighthouse energy
         self.LH_OWNER_IDX_INC_OH = 2  # lighthouse owner 2 bit - 00(neutral), 01(1) or 10(-1)
         self.LH_KEY_IDX_INC_OH = 2  # player has lighthouse key
         self.LH_CONN_IDX_INC_OH = 5  # lighthouse laser connections with other lhs
@@ -169,8 +169,10 @@ class OneHotEncoder(Encoder):
             return [int(i) for i in list('{0:09b}'.format(num))]
         if length == 10:
             return [int(i) for i in list('{0:010b}'.format(num))]
-        if length == 13:
-            return [int(i) for i in list('{0:013b}'.format(num))]
+        if length == 14:
+            return [int(i) for i in list('{0:014b}'.format(num))]
+        if length == 15:
+            return [int(i) for i in list('{0:015b}'.format(num))]
         raise TypeError("Length not supported:", length)
 
     @staticmethod

@@ -57,6 +57,28 @@ class Island(object):
         return Island(island, energy)
 
     @staticmethod
+    def get_view(pos, energy):
+        px, py = pos
+        view = []
+        horizon = 3
+        horizon_map = list()
+        dist = horizon
+        for y in range(-dist, dist + 1):
+            row = list()
+            for x in range(-dist, dist + 1):
+                row.append(distt((0, 0), (x, y)) <= horizon)
+            horizon_map.append(row)
+        for y in range(-dist, dist + 1):
+            row = list()
+            for x in range(-dist, dist + 1):
+                if horizon_map[y + dist][x + dist]:
+                    row.append(energy[px + x, py + y])
+                else:
+                    row.append(-1)
+            view.append(row)
+        return view
+
+    @staticmethod
     def encode_view(pieces, pose) -> None:
         horizon = 3
         horizon_map = list()

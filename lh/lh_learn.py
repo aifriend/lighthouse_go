@@ -30,3 +30,12 @@ if __name__ == "__main__":
         print("Loading trainExamples from file...")
         c.loadTrainExamples(1)
     c.learn()
+
+    # Profiling
+    """
+    pr = cProfile.Profile()
+    pr.enable()
+    c.learn()
+    pr.disable()
+    pr.print_stats()
+    """

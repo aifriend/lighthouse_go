@@ -2,6 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
+from lh.LHPlayers import GoLHPlayer
 from lh.config.encoders import OneHotEncoder
 from lib.utils import dotdict
 
@@ -114,6 +115,8 @@ class LHConfig:
                 return self._PitNNetPlayer(game, player_config, player_model_file, self.args).play
             if player_type == 'random':
                 return RandomLHPlayer(game, self).play
+            if player_type == 'go':
+                return GoLHPlayer(game, self).play
             if player_type == 'greedy':
                 return GreedyLHPlayer(game, self).play
             if player_type == 'human':

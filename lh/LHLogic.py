@@ -71,7 +71,6 @@ class LHLogic:
                 raise MoveError("Connect command requires destination")
             try:
                 dest = act_value
-                hash(dest)
             except Exception:
                 raise MoveError("Destination must be a coordinate pair")
             self._board.connect(player, dest)
@@ -116,33 +115,21 @@ class LHLogic:
         for row in range(self._board.size[0]):
             for col in range(self._board.size[1]):
                 if (col, row) == player.pos:
-
-                    # AVAILABLE ACTION - LH - CONN
-                    valid_conn = self._board.get_available_lh_connection_moves(player)
-                    if sum(valid_conn) > 0:
-                        moves.extend(valid_conn)
-                        continue
+                    # AVAILABLE ACTION - WK - MOVE
+                    valid_move = self._board.get_available_worker_moves(player)
+                    moves.extend(valid_move)
 
                     # AVAILABLE ACTION - WK - ATTACK
                     valid_attack = self._board.get_available_attack_moves(player)
-                    if sum(valid_attack) > 0:
-                        moves.extend(valid_attack)
-                        continue
+                    moves.extend(valid_attack)
 
-                    # AVAILABLE ACTION - WK - MOVE
-                    valid_move = self._board.get_available_worker_moves(player)
-                    if sum(valid_move) > 0:
-                        moves.extend(valid_move)
-                        continue
-
-                    # NOT AVAILABLE ACTION FOR THIS PLAYER
-                    moves.extend([0] * Configuration.NUM_ACTS)
-
+                    # AVAILABLE ACTION - LH - CONN
+                    valid_conn = self._board.get_available_lh_connection_moves(player)
+                    moves.extend(valid_conn)
                 else:
                     # return the generated move list
                     moves.extend([0] * Configuration.NUM_ACTS)
 
-        # (7182,)->(7163,)
         assert len(moves) == 7182
 
         return moves

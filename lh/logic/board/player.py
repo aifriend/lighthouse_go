@@ -1,3 +1,5 @@
+import random
+
 from lh.config.configuration import Configuration
 from lh.config.gameconfig import MoveError
 
@@ -21,6 +23,10 @@ class Player(object):
     @property
     def pos(self):
         return self._pos
+
+    @pos.setter
+    def pos(self, value):
+        self._pos = value
 
     @property
     def energy(self):
@@ -59,10 +65,21 @@ class Player(object):
         pieces[:, :, Configuration.LH_KEY_IDX] = 0
 
     @staticmethod
-    def init(players):
+    def init(players, island):
         player_list = dict()
+        row, col = island.island_map.shape
+        r_player_pose = tuple()
         for i, (c, pos) in enumerate(players[:2]):
-            player_list[pos] = Player(pos, (-1 if i == 0 else 1))
+            player = Player(pos, (-1 if i == 0 else 1))
+            while True:
+                new_x = int(round(random.uniform(0.0, float(row - 1))))
+                new_y = int(round(random.uniform(0.0, float(col - 1))))
+                if island[new_x, new_y]:
+                    if i == 0 or (i == 1 and r_player_pose != (new_x, new_y)):
+                        r_player_pose = (new_x, new_y)
+                        player.pos = r_player_pose
+                        player_list[player.pos] = player
+                        break
         return player_list
 
     @staticmethod

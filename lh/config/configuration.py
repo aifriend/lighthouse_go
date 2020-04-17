@@ -26,12 +26,13 @@ class Configuration:
     FPS = 100
 
     # Endgame threshold
-    ENDGAME_THRESHOLD = 350
+    ENDGAME_THRESHOLD = 130
 
     # Rewards
-    REWARD_LH = 2
-    REWARD_LH_LINKED = 2
-    REWARD_LH_CELL = 1
+    SCORE_LH = 2
+    SCORE_LH_LINKED = 2
+    SCORE_LH_CELL = 1
+    SCORE_ENERGY_GAIN = 1
 
     # ##################################
     # ########### ENCODERS #############

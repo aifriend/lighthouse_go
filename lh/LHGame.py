@@ -96,18 +96,17 @@ class LHGame(Game):
         self.logic.from_array(board)
 
         # detect score distance
-        score_player1 = self.get_score_by(board, player_id)
-        score_player2 = self.get_score_by(board, -player_id)
-        if abs(score_player1 - score_player2) > Configuration.ENDGAME_THRESHOLD:
-            better_player = 1 if score_player1 > score_player2 else -1
-            return better_player
+        if self.config.endgame_threshold:
+            score_player1 = self.logic.board.player_by(player_id).score
+            score_player2 = self.logic.board.player_by(-player_id).score
+            if abs(score_player1 - score_player2) > Configuration.ENDGAME_THRESHOLD:
+                better_player = 1 if score_player1 > score_player2 else -1
+                print('__|', end="")
+                return better_player
 
         # detect timeout
         if board[0, 0, Configuration.TIME_IDX] <= 0:
-            if score_player1 == score_player2 or \
-                    (self.config.endgame_threshold and
-                     abs(score_player1 - score_player2) <= Configuration.ENDGAME_THRESHOLD):
-                return 0.001
+            return 0.001
 
         # detect no valid actions
         if not self.logic.valid_moves_left(1):
@@ -175,19 +174,3 @@ class LHGame(Game):
 
     def stringRepresentation(self, board: np.ndarray) -> bytes:
         return board.tostring()
-
-    def get_score_by(self, board: np.array, turn: int) -> int:
-        """
-        Uses an elo function that determine better player
-
-        :param board: game state
-        :param turn: current player
-        :return: elo for current player on this board
-        """
-        # update board status
-        self.logic.from_array(board)
-
-        # get player
-        player = self.logic.board.player_by(turn)
-
-        return player.score
