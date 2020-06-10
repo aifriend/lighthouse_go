@@ -1,0 +1,12 @@
+Name: Pegasus v0.1
+Author: aifriend <aifriend@euskalencounter.org>
+Position: Consultor de IA
+Licence: Dominio Público
+
+Robot that plays with IA
+
+Requirements:
+	Python v3.7.x
+
+Uso:
+$ python3.7 player/p_pegasus/pegasus.py

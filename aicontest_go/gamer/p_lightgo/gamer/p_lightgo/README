@@ -1,0 +1,14 @@
+Name: Lightgo v1.0
+Author: aifriend <aifriend@euskalencounter.org>
+Position: Arquitecto IA
+Licence: GPL
+
+Robot that plays with IA
+
+Requirements:
+	Python v3.8.x
+	PyGame v1.9.6
+		# pip install pygame
+
+Uso:
+$ python2.7 engine/game.py maps/<mapa.txt> 'python3 player/p_lightgo/lightgo.py'...
