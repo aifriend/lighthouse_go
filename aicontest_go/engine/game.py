@@ -34,9 +34,9 @@ while True:
     game.post_round()
     score = ""
     for i in range(len(bots)):
-        score += "P%d: %d" % (i, game.players[i].score)
-    print "########### ROUND %d SCORE %s\n" % (coach, score),
+        score += " P%d: %d" % (i, game.players[i].score)
+    print "### ROUND %d SCORE %s\n" % (coach, score),
     coach += 1
-    delay(1000)
+    delay(300)
 
 window.update()

@@ -1,6 +1,6 @@
 import random
 
-from bot import Bot
+from interface import Bot, Interface
 from utils import Utils
 
 
@@ -13,7 +13,7 @@ class LightGo(Bot):
 
     def __init__(self, init_state=None):
         super().__init__(init_state)
-        if init_state is not None:
+        if init_state is None:
             self.lh_dist_maps = list()
         else:
             self.lh_dist_maps = {
