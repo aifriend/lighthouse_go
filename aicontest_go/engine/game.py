@@ -37,6 +37,6 @@ while True:
         score += " P%d: %d" % (i, game.players[i].score)
     print "### ROUND %d SCORE %s\n" % (coach, score),
     coach += 1
-    delay(300)
+    delay(200)
 
 window.update()
