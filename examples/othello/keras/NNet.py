@@ -1,18 +1,12 @@
-import argparse
-import math
+import numpy as np
 import os
-import random
-import shutil
 import sys
 import time
-
-import numpy as np
 
 sys.path.append('../..')
 from utils import *
 from NeuralNet import NeuralNet
 
-import argparse
 from OthelloNNet import OthelloNNet as onnet
 
 args = dotdict({

@@ -26,8 +26,8 @@ class Board:
         for y in range(self.n):
             for x in range(self.n):
                 if self[x][y] == 0:
-                    newmove = (x, y)
-                    moves.add(newmove)
+                    new_move = (x, y)
+                    moves.add(new_move)
         return list(moves)
 
     def has_legal_moves(self):

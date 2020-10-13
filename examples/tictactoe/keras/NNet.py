@@ -1,28 +1,14 @@
-import argparse
-import math
+import numpy as np
 import os
-import random
-import shutil
 import sys
 import time
 
-import numpy as np
+from lib.NeuralNet import NeuralNet
+from lib.utils import dotdict
 
 sys.path.append('..')
-from utils import *
-from NeuralNet import NeuralNet
 
-import argparse
 from .TicTacToeNNet import TicTacToeNNet as onnet
-
-"""
-NeuralNet wrapper class for the TicTacToeNNet.
-
-Author: Evgeny Tyurin, github.com/evg-tyurin
-Date: Jan 5, 2018.
-
-Based on (copy-pasted from) the NNet by SourKream and Surag Nair.
-"""
 
 args = dotdict({
     'lr': 0.001,
@@ -36,6 +22,7 @@ args = dotdict({
 
 class NNetWrapper(NeuralNet):
     def __init__(self, game):
+        super().__init__()
         self.nnet = onnet(game, args)
         self.board_x, self.board_y = game.getBoardSize()
         self.action_size = game.getActionSize()
@@ -67,17 +54,16 @@ class NNetWrapper(NeuralNet):
         return pi[0], v[0]
 
     def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
-        filepath = os.path.join(folder, filename)
+        file_path = os.path.join(folder, filename)
         if not os.path.exists(folder):
             print("Checkpoint Directory does not exist! Making directory {}".format(folder))
             os.mkdir(folder)
         else:
             print("Checkpoint Directory exists! ")
-        self.nnet.model.save_weights(filepath)
+        self.nnet.model.save_weights(file_path)
 
     def load_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
-        # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L98
-        filepath = os.path.join(folder, filename)
-        if not os.path.exists(filepath):
-            raise ("No model in path '{}'".format(filepath))
-        self.nnet.model.load_weights(filepath)
+        file_path = os.path.join(folder, filename)
+        if not os.path.exists(file_path):
+            raise ("No model in path '{}'".format(file_path))
+        self.nnet.model.load_weights(file_path)

@@ -1,7 +1,6 @@
+import numpy as np
 import sys
 from typing import Any
-
-import numpy as np
 
 sys.path.append('../..')
 from rts.src.config import d_a_type, d_acts, A_TYPE_IDX, P_NAME_IDX, CARRY_IDX, MONEY_IDX, NUM_ACTS, ACTS_REV, \
@@ -288,7 +287,7 @@ class Board:
                                                                                                                  d_a_type[
                                                                                                                      'Hall'],
                                                                                                                  check_friendly=True) and (
-                               config.MAX_GOLD >= self[x][y][MONEY_IDX] + config.MONEY_INC)
+                    config.MAX_GOLD >= self[x][y][MONEY_IDX] + config.MONEY_INC)
 
         if act == "attack_up":
             return config.acts_enabled.attack and self._check_if_attack(x, y, x, y - 1)

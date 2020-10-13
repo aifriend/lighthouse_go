@@ -1,12 +1,11 @@
 import ctypes
+import numpy as np
 import os
+import pygame
 import sys
 from math import sqrt
-from typing import List
-
-import numpy as np
-import pygame
 from pygame.rect import Rect
+from typing import List
 
 sys.path.append('..')
 from rts.src.config import NUM_ACTS, P_NAME_IDX, A_TYPE_IDX, d_user_shortcuts, FPS, ACTS, d_a_type, ACTS_REV, \
@@ -102,7 +101,7 @@ class HumanRTSPlayer:
         """
         n = board.shape[0]
         canvas_scale = int(ctypes.windll.user32.GetSystemMetrics(1) * (
-                    16 / 30) / n)  # for drawing - it takes 2 thirds of screen height
+                16 / 30) / n)  # for drawing - it takes 2 thirds of screen height
 
         # select object by clicking on it - you can select only your objects
 
@@ -176,8 +175,8 @@ class HumanRTSPlayer:
 
                             actor_size = int(canvas_scale / 3)
                             actor_location = (
-                            int(clicked_actor.x * canvas_scale + canvas_scale / 2 + canvas_scale - actor_size),
-                            int(clicked_actor.y * canvas_scale + canvas_scale / 2 + canvas_scale - actor_size))
+                                int(clicked_actor.x * canvas_scale + canvas_scale / 2 + canvas_scale - actor_size),
+                                int(clicked_actor.y * canvas_scale + canvas_scale / 2 + canvas_scale - actor_size))
                             rect = Rect(actor_location, (2 * actor_size, 2 * actor_size))
 
                             blue = (0, 0, 255)
@@ -199,9 +198,9 @@ class HumanRTSPlayer:
                                     text_scale = int(actor_size * 0.5)
                                     message_display(game_display,
                                                     u"" + ACTS_REV[i] + " s: '" + d_user_shortcuts_rev[i] + "'", (
-                                                    3 * canvas_scale + int(printed_actions % 3) * canvas_scale * 2,
-                                                    (n + 1) * canvas_scale + text_scale / 2 + int(
-                                                        printed_actions / 3) * text_scale + int(text_scale / 4)),
+                                                        3 * canvas_scale + int(printed_actions % 3) * canvas_scale * 2,
+                                                        (n + 1) * canvas_scale + text_scale / 2 + int(
+                                                            printed_actions / 3) * text_scale + int(text_scale / 4)),
                                                     text_scale)
                                     printed_actions += 1
                             # update display

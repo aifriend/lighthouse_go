@@ -1,16 +1,18 @@
 from __future__ import print_function
 
+import numpy as np
 import sys
+from TicTacToeLogic import Board
+
+from lib.Game import Game
 
 sys.path.append('..')
-from Game import Game
-from .TicTacToeLogic import Board
-import numpy as np
 
 
 class TicTacToeGame(Game):
 
     def __init__(self, n=3):
+        super().__init__()
         self.n = n
 
     def getInitBoard(self):
@@ -20,7 +22,7 @@ class TicTacToeGame(Game):
 
     def getBoardSize(self):
         # (a,b) tuple
-        return (self.n, self.n)
+        return self.n, self.n
 
     def getActionSize(self):
         # return number of actions

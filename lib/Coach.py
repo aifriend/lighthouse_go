@@ -1,11 +1,10 @@
+import numpy as np
 import os
 import sys
 import time
 from collections import deque
 from pickle import Pickler, Unpickler
 from random import shuffle
-
-import numpy as np
 
 from lib.Arena import Arena
 from lib.MCTS import MCTS

@@ -1,8 +1,7 @@
 import ctypes
+import numpy as np
 import sys
 from typing import Any, Tuple, Optional
-
-import numpy as np
 
 sys.path.append('../..')
 from rts.src.config import P_NAME_IDX, A_TYPE_IDX, d_a_color, d_type_rev, MONEY_IDX, TIME_IDX, CARRY_IDX, HEALTH_IDX
@@ -46,7 +45,7 @@ def init_visuals(world_width: int, world_height: int, verbose=True) -> Optional[
 
         pygame.init()
         canvas_scale = int(ctypes.windll.user32.GetSystemMetrics(1) * (
-                    2 / 3) / world_height)  # for drawing - it takes 2 thirds of screen height
+                2 / 3) / world_height)  # for drawing - it takes 2 thirds of screen height
 
         # square
 
@@ -99,13 +98,13 @@ def update_graphics(board: np.ndarray, game_display, clock, fps: int = 1) -> Non
     message_display(game_display, u"" + 'Gold Player +1: ' + str(gold_p1), (int((n / 8) * canvas_scale),
                                                                             (n + 1) * canvas_scale + int(int(
                                                                                 canvas_scale / 12) + canvas_scale * (
-                                                                                                                     0 / 4) + int(
+                                                                                                                 0 / 4) + int(
                                                                                 canvas_scale * (1 / 8)))),
                     int(canvas_scale / 6))
     message_display(game_display, u"" + 'Gold Player -1: ' + str(gold_p2), (int((n / 8) * canvas_scale),
                                                                             (n + 1) * canvas_scale + int(int(
                                                                                 canvas_scale / 12) + canvas_scale * (
-                                                                                                                     1 / 4) + int(
+                                                                                                                 1 / 4) + int(
                                                                                 canvas_scale * (1 / 8)))),
                     int(canvas_scale / 6))
 
@@ -113,7 +112,7 @@ def update_graphics(board: np.ndarray, game_display, clock, fps: int = 1) -> Non
     message_display(game_display, u"" + 'Remaining ' + str(time_remaining), (int((n / 8) * canvas_scale),
                                                                              (n + 1) * canvas_scale + int(int(
                                                                                  canvas_scale / 12) + canvas_scale * (
-                                                                                                                      2 / 4) + int(
+                                                                                                                  2 / 4) + int(
                                                                                  canvas_scale * (1 / 8)))),
                     int(canvas_scale / 6))
 

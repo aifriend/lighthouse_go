@@ -1,8 +1,7 @@
+import numpy as np
 import os
 import sys
 from typing import List, Tuple
-
-import numpy as np
 
 sys.path.append('../..')
 from rts.src.encoders import OneHotEncoder, NumericEncoder

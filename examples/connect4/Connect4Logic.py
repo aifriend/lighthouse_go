@@ -1,6 +1,5 @@
-from collections import namedtuple
-
 import numpy as np
+from collections import namedtuple
 
 DEFAULT_HEIGHT = 6
 DEFAULT_WIDTH = 7

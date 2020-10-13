@@ -1,24 +1,15 @@
-import argparse
-import math
+import numpy as np
 import os
-import random
-import shutil
 import sys
 import time
-
-import numpy as np
 
 sys.path.append('../../')
 from utils import *
 from pytorch_classification.utils import Bar, AverageMeter
 from NeuralNet import NeuralNet
 
-import argparse
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-from torchvision import datasets, transforms
 from torch.autograd import Variable
 
 from .OthelloNNet import OthelloNNet as onnet

@@ -1,8 +1,6 @@
 # noinspection PyUnresolvedReferences
-import os
-
-import gc
 import numpy as np
+import os
 import tensorflow as tf
 # noinspection PyUnresolvedReferences
 import unreal_engine as ue

@@ -1,8 +1,7 @@
-import sys
-from typing import Tuple
-
 import numpy as np
+import sys
 from rts.src.config_class import CONFIG
+from typing import Tuple
 
 sys.path.append('..')
 from rts.src.Board import Board

@@ -1,19 +1,12 @@
-import argparse
-import math
-import os
-import random
-import shutil
-import sys
-import time
-
 import numpy as np
+import os
+import sys
 import tensorflow as tf
 
 sys.path.append('..')
 from utils import *
 from NeuralNet import NeuralNet
 
-import argparse
 from .GobangNNet import GobangNNet as onnet
 
 args = dotdict({
