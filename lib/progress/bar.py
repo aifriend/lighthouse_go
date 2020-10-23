@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
-from . import Progress
+from pip._vendor.progress import Progress
+
 from .helpers import WritelnMixin
 
 

@@ -77,7 +77,7 @@ class Arena:
         oneWon = 0
         twoWon = 0
         draws = 0
-        for _ in range(num):
+        for n in range(num):
             gameResult = self.playGame(verbose=verbose)
             if gameResult == 1:
                 oneWon += 1
@@ -95,6 +95,7 @@ class Arena:
                                                                                                        total=bar.elapsed_td,
                                                                                                        eta=bar.eta_td)
             bar.next()
+            print(f"{n}.")
 
         self.player1, self.player2 = self.player2, self.player1
 

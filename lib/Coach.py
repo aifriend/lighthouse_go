@@ -99,6 +99,7 @@ class Coach:
                         eps=eps + 1, maxeps=self.args.numEps, et=eps_time.avg,
                         total=bar.elapsed_td, eta=bar.eta_td)
                     bar.next()
+                    print(f"{eps}.", end='')
                 bar.finish()
 
                 # save the iteration examples to the history 
