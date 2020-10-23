@@ -4,8 +4,8 @@ from tictactoe.NNet import NNetWrapper as nnw
 from tictactoe.TicTacToeGame import TicTacToeGame as Game
 
 args = dotdict({
-    'numIters': 1000,
-    'numEps': 10,
+    'numIters': 10,
+    'numEps': 50,
     'tempThreshold': 15,
     'updateThreshold': 0.6,
     'maxlenOfQueue': 200000,

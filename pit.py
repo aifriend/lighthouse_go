@@ -16,12 +16,12 @@ any agent.
 g = TicTacToeGame()
 
 # all players
-rp = RandomPlayer(g).play
+#rp = RandomPlayer(g).play
 hp = HumanTicTacToePlayer(g).play
 
 # nnet players
 n1 = NNet(g)
-n1.load_checkpoint('tictactoe/pretrained_models', 'best_model.pth.tar')
+n1.load_checkpoint('tictactoe/pretrained_models', 'best.pth.tar')
 args1 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0})
 mcts1 = MCTS(g, n1, args1)
 n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))

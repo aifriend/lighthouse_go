@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
-from pip._vendor.progress import Infinite
-
+from . import Infinite
 from .helpers import WriteMixin
 
 

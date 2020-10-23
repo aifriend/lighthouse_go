@@ -95,7 +95,6 @@ class Arena:
                                                                                                        total=bar.elapsed_td,
                                                                                                        eta=bar.eta_td)
             bar.next()
-            print(f"{n}.")
 
         self.player1, self.player2 = self.player2, self.player1
 
