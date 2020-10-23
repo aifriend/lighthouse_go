@@ -5,7 +5,7 @@ from lib.MCTS import MCTS
 from lib.utils import dotdict
 from tictactoe.NNet import NNetWrapper as NNet
 from tictactoe.TicTacToeGame import TicTacToeGame, display
-from tictactoe.TicTacToePlayers import RandomPlayer, HumanTicTacToePlayer
+from tictactoe.TicTacToePlayers import HumanTicTacToePlayer
 
 """
 use this script to play any two agents against each other, or play manually with
@@ -16,7 +16,7 @@ any agent.
 g = TicTacToeGame()
 
 # all players
-#rp = RandomPlayer(g).play
+# rp = RandomPlayer(g).play
 hp = HumanTicTacToePlayer(g).play
 
 # nnet players

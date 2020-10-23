@@ -5,7 +5,7 @@ import numpy as np
 
 from lib.NeuralNet import NeuralNet
 from lib.utils import *
-from tictactoe.TicTacToeNNet import TicTacToeNNet as TTTNet
+from tictactoe.TicTacToeNNet import TicTacToeNNet
 
 """
 NeuralNet wrapper class for the TicTacToeNNet.
@@ -29,7 +29,7 @@ args = dotdict({
 class NNetWrapper(NeuralNet):
     def __init__(self, game):
         super().__init__(game)
-        self.nnet = TTTNet(game, args)
+        self.nnet = TicTacToeNNet(game, args)
         self.board_x, self.board_y = game.getBoardSize()
         self.action_size = game.getActionSize()
 

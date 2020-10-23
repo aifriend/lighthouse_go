@@ -66,7 +66,8 @@ class TicTacToeGame(Game):
             return -1
         if b.has_legal_moves():
             return 0
-        # draw has a very little value 
+
+        # draw has a very little value
         return 1e-4
 
     def getCanonicalForm(self, board, player):
