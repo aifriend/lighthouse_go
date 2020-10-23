@@ -14,6 +14,7 @@ Based on the OthelloGame then getGameEnded() was adapted to new rules.
 
 class TicTacToeGame(Game):
     def __init__(self, n=3):
+        super().__init__()
         self.n = n
 
     def getInitBoard(self):

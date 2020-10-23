@@ -38,7 +38,7 @@ class MCTS:
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
 
         if temp == 0:
-            best_action = np.argmax(counts)
+            best_action = int(np.argmax(counts))
             probs = [0] * len(counts)
             probs[best_action] = 1
             return probs

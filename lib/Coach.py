@@ -25,6 +25,7 @@ class Coach:
         self.pnet = self.nnet.__class__(self.game)  # the competitor network
         self.args = args
         self.mcts = MCTS(self.game, self.nnet, self.args)
+        self.curPlayer = -1
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
 
@@ -139,7 +140,8 @@ class Coach:
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
 
-    def getCheckpointFile(self, iteration):
+    @staticmethod
+    def getCheckpointFile(iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'
 
     def saveTrainExamples(self, iteration):
@@ -149,7 +151,6 @@ class Coach:
         filename = os.path.join(folder, self.getCheckpointFile(iteration) + ".examples")
         with open(filename, "wb+") as f:
             Pickler(f).dump(self.trainExamplesHistory)
-        f.closed
 
     def loadTrainExamples(self):
         modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
@@ -163,6 +164,5 @@ class Coach:
             print("File with trainExamples found. Read it.")
             with open(examplesFile, "rb") as f:
                 self.trainExamplesHistory = Unpickler(f).load()
-            f.closed
             # examples based on the model were already collected (loaded)
             self.skipFirstSelfPlay = True
